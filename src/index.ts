@@ -1,26 +1,24 @@
-import { Markup, Telegraf } from 'telegraf';
+import { Telegraf } from 'telegraf';
 import { sonarr } from './sonarr';
-// import { message } from 'telegraf/filters';
 
 require('dotenv').config();
 
 const bot = new Telegraf(process.env.BOT_TOKEN ?? '');
 
 bot.start((ctx) => ctx.reply('Welcome'));
-// bot.help((ctx) => ctx.reply('Send me a sticker'));
-// bot.on(message('sticker'), (ctx) => ctx.reply('👍'));
-sonarr.options.forEach((o) => {
-    bot.hears(o, async (ctx) => {
-        const res = await sonarr.handleAction(o);
-        ctx.reply(res ?? 'unknown', Markup.removeKeyboard());
-    });
-});
 
 bot.command('sonarr', (ctx) => {
-    ctx.reply('What do you want to do?', Markup.keyboard([...sonarr.options]));
+    ctx.reply('Sonarr options:', sonarr.keyboard);
 });
-bot.command('close', (ctx) => {
-    ctx.reply('👋', Markup.removeKeyboard());
+
+bot.on('callback_query', async (ctx) => {
+    const { data } = ctx.update.callback_query as { data: string };
+    console.log('call', data);
+    if (data.startsWith(sonarr.prefix)) {
+        const res = await sonarr.handleAction(data);
+        ctx.reply(res);
+    }
+    ctx.answerCbQuery('✅');
 });
 
 bot.launch();
