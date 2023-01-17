@@ -1,4 +1,8 @@
+import { config } from '../config';
+import { Series } from './types';
+
 const baseURL = 'http://10.0.0.55:8989/api/v3';
+const key = config.SONARR_KEY;
 
 const fetchTimeout = async (
     url: string,
@@ -9,7 +13,11 @@ const fetchTimeout = async (
         controller.abort();
     }, init.timeout);
     try {
-        return await fetch(url, { ...init, signal: controller.signal });
+        return await fetch(url, {
+            ...init,
+            signal: controller.signal,
+            headers: { ['x-api-key']: key },
+        });
     } finally {
         clearTimeout(id);
     }
@@ -22,4 +30,12 @@ export async function health() {
     } catch (error) {
         return false;
     }
+}
+
+export async function search(name: string) {
+    const res = await fetchTimeout(`${baseURL}/series/lookup?term=${name}`, {
+        timeout: 5 * 1000,
+    });
+    const data: Series[] = await res.json();
+    return data;
 }
