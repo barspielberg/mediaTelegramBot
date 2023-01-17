@@ -1,4 +1,5 @@
 import { Telegraf } from 'telegraf';
+import { message } from 'telegraf/filters';
 import { sonarr } from './sonarr';
 
 require('dotenv').config();
@@ -9,6 +10,13 @@ bot.start((ctx) => ctx.reply('Welcome'));
 
 bot.command('sonarr', (ctx) => {
     ctx.reply('Sonarr options:', sonarr.keyboard);
+});
+
+bot.on(message('text'), (ctx) => {
+    if (sonarr.waitingFor) {
+        const res = sonarr.waitingFor(ctx.message.text);
+        ctx.reply(res);
+    }
 });
 
 bot.on('callback_query', async (ctx) => {
