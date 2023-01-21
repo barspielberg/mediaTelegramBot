@@ -11,7 +11,7 @@ bot.command('sonarr', (ctx) => {
 });
 
 bot.on('message:text', async (ctx) => {
-    const { waitingFor } = sonarr.chatState[ctx.chat.id] ?? {};
+    const { waitingFor } = sonarr.chatHandlers[ctx.chat.id] ?? {};
     if (waitingFor) {
         const { message, markup } = await waitingFor(ctx.message.text);
         ctx.reply(message, {
