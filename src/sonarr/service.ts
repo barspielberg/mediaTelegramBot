@@ -2,10 +2,6 @@ import { InlineKeyboard, ReplyMessage } from '../packages/grammy.ts';
 import * as api from './api.ts';
 import { Series } from './types.ts';
 
-export const prefix = 'sonarr:';
-
-export const chatState: Record<number, State> = {};
-
 type Response = {
     message: string;
     markup?: ReplyMessage['reply_markup'];
@@ -15,6 +11,10 @@ type State = {
     waitingFor?: (text: string) => Promise<Response>;
     currentSearch?: Series[];
 };
+
+export const prefix = 'sonarr:';
+
+export const chatState: Record<number, State> = {};
 
 const seriesInPage = 5;
 function getNextSearch(chatId: number) {
