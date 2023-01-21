@@ -1,7 +1,6 @@
-import { InlineKeyboard } from 'grammy';
-import { ReplyMessage } from 'grammy/out/types';
-import * as api from './api';
-import { Series } from './types';
+import { InlineKeyboard, ReplyMessage } from '../packages/grammy.ts';
+import * as api from './api.ts';
+import { Series } from './types.ts';
 
 export const prefix = 'sonarr:';
 
@@ -43,12 +42,12 @@ type Action = typeof keys[keyof typeof keys];
 
 const actions: Record<
     Action,
-    (chatId: number) => Promise<Response | undefined>
+    (chatId: number) => Promise<Response | undefined> | Response | undefined
 > = {
     [keys.health]: async () => {
         return { message: (await api.health()) ? '👌' : '😥' };
     },
-    [keys.search]: async (chatId) => {
+    [keys.search]: (chatId) => {
         chatState[chatId].waitingFor = async (text) => {
             chatState[chatId].waitingFor = undefined;
             try {
@@ -57,13 +56,13 @@ const actions: Record<
                     message: displaySeries(getNextSearch(chatId)!),
                     markup: keyboard([keys.more]),
                 };
-            } catch (error) {
+            } catch (_) {
                 return { message: '😵' };
             }
         };
         return { message: 'what to search?' };
     },
-    [keys.more]: async (chatId) => {
+    [keys.more]: (chatId) => {
         const current = getNextSearch(chatId);
         if (!current || current?.length <= 0) {
             return { message: 'no more' };
@@ -81,7 +80,7 @@ export function keyboard(actions: Action[]) {
     );
 }
 
-export async function handleAction(option: string, chatId?: number) {
+export function handleAction(option: string, chatId?: number) {
     const key = option.split(prefix)[1] as Action;
     if (!chatId) {
         return;

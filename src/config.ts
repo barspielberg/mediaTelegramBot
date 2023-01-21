@@ -1,8 +1,6 @@
-import * as dotenv from 'dotenv';
-
-dotenv.config();
+import 'https://deno.land/x/dotenv@v3.2.0/load.ts';
 
 export const config = {
-    BOT_TOKEN: process.env.BOT_TOKEN ?? '',
-    SONARR_KEY: process.env.SONARR_KEY ?? '',
+    BOT_TOKEN: Deno.env.get('BOT_TOKEN') ?? '',
+    SONARR_KEY: Deno.env.get('SONARR_KEY') ?? '',
 };

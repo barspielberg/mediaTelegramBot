@@ -1,6 +1,6 @@
-import { Bot } from 'grammy';
-import { config } from './config';
-import { sonarr } from './sonarr';
+import { Bot } from './packages/grammy.ts';
+import { config } from './config.ts';
+import { sonarr } from './sonarr/index.ts';
 
 const bot = new Bot(config.BOT_TOKEN);
 
@@ -33,5 +33,5 @@ bot.on('callback_query', async (ctx) => {
 bot.start({ drop_pending_updates: true });
 
 // Enable graceful stop
-process.once('SIGINT', () => bot.stop());
-process.once('SIGTERM', () => bot.stop());
+Deno.addSignalListener('SIGINT', () => bot.stop());
+Deno.addSignalListener('SIGTERM', () => bot.stop());

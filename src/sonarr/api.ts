@@ -1,5 +1,5 @@
-import { config } from '../config';
-import { Series } from './types';
+import { config } from '../config.ts';
+import { Series } from './types.ts';
 
 const baseURL = 'http://10.0.0.55:8989/api/v3';
 const key = config.SONARR_KEY;
@@ -27,7 +27,7 @@ export async function health() {
     try {
         await fetchTimeout(baseURL + '/health', { timeout: 5 * 1000 });
         return true;
-    } catch (error) {
+    } catch (_) {
         return false;
     }
 }
