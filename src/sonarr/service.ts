@@ -1,5 +1,5 @@
-import { Markup } from 'telegraf';
-import { InlineKeyboardMarkup } from 'telegraf/typings/core/types/typegram';
+import { InlineKeyboard } from 'grammy';
+import { ReplyMessage } from 'grammy/out/types';
 import * as api from './api';
 import { Series } from './types';
 
@@ -9,7 +9,7 @@ export const chatState: Record<number, State> = {};
 
 type Response = {
     message: string;
-    markup?: Markup.Markup<InlineKeyboardMarkup>;
+    markup?: ReplyMessage['reply_markup'];
 };
 
 type State = {
@@ -76,7 +76,7 @@ const actions: Record<
 };
 
 export function keyboard(actions: Action[]) {
-    return Markup.inlineKeyboard(
+    return new InlineKeyboard(
         actions.map((key) => [{ text: key, callback_data: prefix + key }])
     );
 }
