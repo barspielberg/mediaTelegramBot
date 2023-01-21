@@ -1,6 +1,6 @@
 import { InlineKeyboard, ReplyMessage } from '../packages/grammy.ts';
 import * as api from './api.ts';
-import { Series } from './types.ts';
+import { Series } from './models.ts';
 
 type Response = {
     message: string;

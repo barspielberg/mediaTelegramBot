@@ -1,5 +1,5 @@
 import { config } from '../config.ts';
-import { Series } from './types.ts';
+import { Series } from './models.ts';
 
 const baseURL = 'http://10.0.0.55:8989/api/v3';
 const key = config.SONARR_KEY;
