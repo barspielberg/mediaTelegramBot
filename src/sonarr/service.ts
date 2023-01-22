@@ -28,7 +28,7 @@ type Action = typeof keys[keyof typeof keys];
 type ActionResponse = Promise<Response | undefined> | Response | undefined;
 
 class ChatHandler {
-    waitingFor?: (text: string) => Promise<Response>;
+    handelText?: (text: string) => Promise<Response>;
     currentSearch?: Series[];
 
     actions: Record<Action, () => ActionResponse> = {
@@ -36,7 +36,7 @@ class ChatHandler {
             return { message: (await api.health()) ? '👌' : '😥' };
         },
         [keys.search]: () => {
-            this.waitingFor = this.waitForShowName;
+            this.handelText = this.waitForShowName;
             return { message: 'what to search?' };
         },
         [keys.more]: () => this.replaySearchResult(),
@@ -75,7 +75,7 @@ class ChatHandler {
     }
 
     private stopWaiting() {
-        this.waitingFor = undefined;
+        this.handelText = undefined;
     }
 }
 

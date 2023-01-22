@@ -11,13 +11,14 @@ bot.command('sonarr', (ctx) => {
 });
 
 bot.on('message:text', async (ctx) => {
-    const { waitingFor } = sonarr.chatHandlers[ctx.chat.id] ?? {};
-    if (waitingFor) {
-        const { message, markup } = await waitingFor(ctx.message.text);
-        ctx.reply(message, {
-            reply_markup: markup,
-        });
+    const { handelText } = sonarr.chatHandlers[ctx.chat.id] ?? {};
+    if (!handelText) {
+        return;
     }
+    const { message, markup } = await handelText(ctx.message.text);
+    ctx.reply(message, {
+        reply_markup: markup,
+    });
 });
 
 bot.on('callback_query', async (ctx) => {
