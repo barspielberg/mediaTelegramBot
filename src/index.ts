@@ -32,6 +32,10 @@ bot.on('callback_query', async (ctx) => {
 
 bot.start({ drop_pending_updates: true });
 
+await bot.api.setMyCommands([
+    { command: 'sonarr', description: 'show tv show options' },
+]);
+
 // Enable graceful stop
 Deno.addSignalListener('SIGINT', () => bot.stop());
 Deno.addSignalListener('SIGTERM', () => bot.stop());
