@@ -1,4 +1,4 @@
-import 'https://deno.land/x/dotenv@v3.2.0/load.ts';
+import './packages/dotenv.ts';
 
 export const config = {
     BOT_TOKEN: Deno.env.get('BOT_TOKEN') ?? '',
