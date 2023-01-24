@@ -1,26 +1,41 @@
-import { InlineKeyboard, ReplyMessage } from '../packages/grammy.ts';
+import {
+    ForceReply,
+    InlineKeyboard,
+    InlineKeyboardMarkup,
+    ReplyKeyboardMarkup,
+    ReplyKeyboardRemove,
+} from '../packages/grammy.ts';
 import * as api from './api.ts';
 import { Series } from './models.ts';
 
 type Response = {
     message: string;
-    markup?: ReplyMessage['reply_markup'];
+    markup?:
+        | InlineKeyboardMarkup
+        | ReplyKeyboardMarkup
+        | ReplyKeyboardRemove
+        | ForceReply;
 };
 
 export const prefix = 'sonarr:';
 
 export const chatHandlers: Record<number, ChatHandler> = {};
 
-const seriesInPage = 5;
-
-function displaySeries(se: Series[]) {
-    return se.map((s) => s.title).join(', ');
+function displaySeries(s: Series) {
+    let res = `${s.title} ${s.year} `;
+    if (s.imdbId) {
+        res += `\nhttps://www.imdb.com/title/${s.imdbId}`;
+    } else {
+        res += `\n${s.remotePoster}`;
+    }
+    return res;
 }
 
 const keys = {
     health: 'ok?',
     search: 'new show',
-    more: 'more?',
+    more: 'next >>',
+    grub: 'grub',
 } as const;
 
 type Action = typeof keys[keyof typeof keys];
@@ -29,7 +44,8 @@ type ActionResponse = Promise<Response | undefined> | Response | undefined;
 
 class ChatHandler {
     handelText?: (text: string) => Promise<Response>;
-    currentSearch?: Series[];
+    searchResults?: Series[];
+    currentIndex = -1;
 
     actions: Record<Action, () => ActionResponse> = {
         [keys.health]: async () => {
@@ -37,15 +53,24 @@ class ChatHandler {
         },
         [keys.search]: () => {
             this.handelText = this.waitForShowName;
-            return { message: 'what to search?' };
+            return {
+                message: 'what to search?',
+                markup: { force_reply: true },
+            };
         },
         [keys.more]: () => this.replaySearchResult(),
+        [keys.grub]: () => {
+            return {
+                message: this.searchResults?.[this.currentIndex].title ?? 'k',
+            };
+        },
     };
 
     private waitForShowName = async (text: string) => {
         this.stopWaiting();
         try {
-            this.currentSearch = await api.search(text);
+            this.searchResults = await api.search(text);
+            this.currentIndex = -1;
             return this.replaySearchResult();
         } catch (_) {
             return { message: '😵' };
@@ -54,24 +79,23 @@ class ChatHandler {
 
     private replaySearchResult() {
         const current = this.getNextSearch();
-        if (!current || current?.length <= 0) {
+        if (!current) {
             return { message: 'no result to show' };
         }
+        const message = displaySeries(current);
         return {
-            message: displaySeries(current),
-            markup: keyboard([keys.more]),
+            message,
+            markup: keyboard([keys.more, keys.grub]),
         };
     }
 
     private getNextSearch() {
-        const { currentSearch } = this;
-        console.log('current', currentSearch?.length);
+        const { searchResults } = this;
 
-        if (!currentSearch) {
+        if (!searchResults) {
             return undefined;
         }
-        this.currentSearch = currentSearch.slice(seriesInPage);
-        return currentSearch.slice(0, seriesInPage);
+        return searchResults[++this.currentIndex];
     }
 
     private stopWaiting() {

@@ -18,6 +18,7 @@ bot.on('message:text', async (ctx) => {
     const { message, markup } = await handelText(ctx.message.text);
     ctx.reply(message, {
         reply_markup: markup,
+        parse_mode: 'HTML',
     });
 });
 
@@ -28,14 +29,16 @@ bot.on('callback_query', async (ctx) => {
         const res = await sonarr.handleAction(data, ctx.chat?.id);
         res && ctx.reply(res.message, { reply_markup: res.markup });
     }
-    ctx.answerCallbackQuery('✅');
+    ctx.answerCallbackQuery();
 });
 
 bot.start({ drop_pending_updates: true });
+console.log('started');
 
 await bot.api.setMyCommands([
     { command: 'sonarr', description: 'show tv show options' },
 ]);
+console.log('send commands');
 
 // Enable graceful stop
 Deno.addSignalListener('SIGINT', () => bot.stop());
