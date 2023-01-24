@@ -4,7 +4,7 @@ import {
     InlineKeyboardMarkup,
     ReplyKeyboardMarkup,
     ReplyKeyboardRemove,
-} from '../packages/grammy.ts';
+} from '../pkg/grammy.ts';
 import * as api from './api.ts';
 import { Series } from './models.ts';
 

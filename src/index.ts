@@ -1,4 +1,4 @@
-import { Bot } from './packages/grammy.ts';
+import { Bot } from './pkg/grammy.ts';
 import { config } from './config.ts';
 import { sonarr } from './sonarr/index.ts';
 
