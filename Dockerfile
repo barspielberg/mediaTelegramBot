@@ -12,4 +12,4 @@ ADD . .
 
 RUN deno cache src/index.ts
 
-CMD ["run", "--unstable", "--allow-net", "--allow-read", "--allow-env", "src/index.ts"]
+CMD ["run", "--allow-net", "--allow-read", "--allow-env", "src/index.ts"]
