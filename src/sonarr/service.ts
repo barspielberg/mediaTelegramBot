@@ -59,11 +59,7 @@ class ChatHandler {
             };
         },
         [keys.more]: () => this.replaySearchResult(),
-        [keys.grub]: () => {
-            return {
-                message: this.searchResults?.[this.currentIndex].title ?? 'k',
-            };
-        },
+        [keys.grub]: () => this.grubCurrentSeries(),
     };
 
     private waitForShowName = async (text: string) => {
@@ -100,6 +96,23 @@ class ChatHandler {
 
     private stopWaiting() {
         this.handelText = undefined;
+    }
+
+    private async grubCurrentSeries() {
+        const { searchResults, currentIndex } = this;
+        const current = searchResults?.[currentIndex];
+        if (!current || current.id) {
+            return {
+                message: current
+                    ? 'You already have that 👍'
+                    : 'cant found series to grub',
+            };
+        }
+        const res = await api.add(current);
+
+        return {
+            message: res ? '👌' : '😿',
+        };
     }
 }
 

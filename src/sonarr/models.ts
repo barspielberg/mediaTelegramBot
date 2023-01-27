@@ -1,4 +1,5 @@
 export interface Series {
+    id?: number;
     title: string;
     sortTitle: string;
     status: Status;
@@ -72,4 +73,13 @@ export enum Status {
     Continuing = 'continuing',
     Ended = 'ended',
     Upcoming = 'upcoming',
+}
+
+export interface AddOptions {
+    //TODO check for more valid options
+    searchForMissingEpisodes: true;
+    searchForCutoffUnmetEpisodes: false;
+    ignoreEpisodesWithFiles: false;
+    ignoreEpisodesWithoutFiles: false;
+    monitor: 'all';
 }

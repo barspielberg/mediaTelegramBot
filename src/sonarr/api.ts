@@ -1,17 +1,18 @@
 import { config } from '../config.ts';
-import { Series } from './models.ts';
+import { AddOptions, Series } from './models.ts';
 
 const baseURL = `${config.BASE_URL}:8989/api/v3`;
 const key = config.SONARR_KEY;
 
+const rootFolderPath = '/tv/';
 const fetchTimeout = async (
     url: string,
-    init: RequestInit & { timeout: number }
+    init?: RequestInit & { timeout?: number }
 ) => {
     const controller = new AbortController();
     const id = setTimeout(() => {
         controller.abort();
-    }, init.timeout);
+    }, init?.timeout ?? 5 * 1000);
     try {
         return await fetch(url, {
             ...init,
@@ -23,19 +24,66 @@ const fetchTimeout = async (
     }
 };
 
+async function get<T = unknown>(url: string) {
+    const res = await fetchTimeout(url);
+    const data: T = await res.json();
+    return data;
+}
+
+async function post(url: string, payload: any) {
+    const res = await fetchTimeout(url, {
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        body: JSON.stringify(payload),
+    });
+    return res;
+}
+
 export async function health() {
     try {
-        await fetchTimeout(baseURL + '/health', { timeout: 5 * 1000 });
+        await get(baseURL + '/health');
         return true;
-    } catch (_) {
+    } catch (error) {
+        console.error(error);
         return false;
     }
 }
 
-export async function search(name: string) {
-    const res = await fetchTimeout(`${baseURL}/series/lookup?term=${name}`, {
-        timeout: 5 * 1000,
-    });
-    const data: Series[] = await res.json();
-    return data;
+export function search(name: string) {
+    return get<Series[]>(`${baseURL}/series/lookup?term=${name}`);
+}
+
+export async function add(
+    series: Series,
+    addOption: AddOptions = {
+        searchForMissingEpisodes: true,
+        searchForCutoffUnmetEpisodes: false,
+        ignoreEpisodesWithFiles: false,
+        ignoreEpisodesWithoutFiles: false,
+        monitor: 'all',
+    }
+) {
+    const { folder, ...rest } = series;
+    const defaults = {
+        alternateTitles: [],
+        path: `${rootFolderPath}${folder}`,
+        qualityProfileId: 6, //TODO add to options
+        languageProfileId: 1,
+        seasonFolder: true,
+        rootFolderPath,
+        added: new Date().toISOString(),
+    };
+    const payload = { ...rest, ...defaults, addOption };
+    try {
+        const res = await post(`${baseURL}/series/`, payload);
+        if (res.ok && res.status === 201) {
+            return true;
+        }
+        console.error(res);
+    } catch (error) {
+        console.error(error);
+        return false;
+    }
+
+    return false;
 }
