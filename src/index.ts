@@ -1,8 +1,5 @@
-import { Bot } from './pkg/grammy.ts';
-import { config } from './config.ts';
+import { bot } from './bot.ts';
 import { sonarr } from './sonarr/index.ts';
-
-const bot = new Bot(config.BOT_TOKEN);
 
 bot.command('sonarr', (ctx) => {
     ctx.reply('Sonarr options:', {

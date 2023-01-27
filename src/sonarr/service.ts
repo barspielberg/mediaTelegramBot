@@ -1,3 +1,4 @@
+import { updateClient } from '../bot.ts';
 import {
     ForceReply,
     InlineKeyboard,
@@ -47,9 +48,12 @@ class ChatHandler {
     searchResults?: Series[];
     currentIndex = -1;
 
+    constructor(private readonly chatId: number) {}
+
     actions: Record<Action, () => ActionResponse> = {
         [keys.health]: async () => {
-            return { message: (await api.health()) ? '👌' : '😥' };
+            const healthy = await updateClient(this.chatId, api.health());
+            return { message: healthy ? '👌' : '😥' };
         },
         [keys.search]: () => {
             this.handelText = this.waitForShowName;
@@ -65,7 +69,10 @@ class ChatHandler {
     private waitForShowName = async (text: string) => {
         this.stopWaiting();
         try {
-            this.searchResults = await api.search(text);
+            this.searchResults = await updateClient(
+                this.chatId,
+                api.search(text)
+            );
             this.currentIndex = -1;
             return this.replaySearchResult();
         } catch (_) {
@@ -108,7 +115,7 @@ class ChatHandler {
                     : 'cant found series to grub',
             };
         }
-        const res = await api.add(current);
+        const res = await updateClient(this.chatId, api.add(current));
 
         return {
             message: res ? '👌' : '😿',
@@ -127,6 +134,6 @@ export function handleAction(option: string, chatId?: number) {
     if (!chatId) {
         return;
     }
-    chatHandlers[chatId] ??= new ChatHandler();
+    chatHandlers[chatId] ??= new ChatHandler(chatId);
     return chatHandlers[chatId].actions[key]?.();
 }
