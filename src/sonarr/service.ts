@@ -104,9 +104,9 @@ class ChatHandler {
 }
 
 export function keyboard(actions: Action[]) {
-    return new InlineKeyboard(
-        actions.map((key) => [{ text: key, callback_data: prefix + key }])
-    );
+    return new InlineKeyboard([
+        actions.map((key) => ({ text: key, callback_data: prefix + key })),
+    ]);
 }
 
 export function handleAction(option: string, chatId?: number) {
