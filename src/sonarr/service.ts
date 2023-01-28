@@ -11,7 +11,7 @@ export const prefix = 'sonarr:';
 export const chatHandlers: Record<number, ChatHandler> = {};
 
 function displaySeries(s: Series) {
-    let res = `${s.title} ${s.year ?? ''} `;
+    let res = `${s.title} ${s.year || ''} `;
     if (s.imdbId) {
         res += `\nhttps://www.imdb.com/title/${s.imdbId}`;
     } else if (s.remotePoster) {
@@ -119,7 +119,7 @@ class ChatHandler {
         };
 
         return {
-            message: `Are you sure you want to delete ${series.title}? (yes/no)`,
+            message: `Are you sure you want to delete "${series.title}"? (yes)`,
             markup: { force_reply: true as const },
         };
     }
@@ -153,15 +153,27 @@ class ChatHandler {
         return this.handelShowName(text);
     };
 
-    private async grubCurrentSeries(index?: string | number) {
+    private grubCurrentSeries(index?: string | number) {
         index = Number(index);
         const current = this.searchResults?.[index];
         if (!current || current.id) {
             return current ? 'You already have that 👍' : 'cant found series to grub';
         }
-        const res = await this.updateProgress(api.add(current));
 
-        return res ? '👌' : '😿';
+        this.handelText = async (text) => {
+            this.setDefaultTextHandling();
+
+            if (text.toLocaleLowerCase() !== 'yes') {
+                return '🤷🏻‍♂';
+            }
+            const res = await this.updateProgress(api.add(current));
+            return res ? '👌' : '😿';
+        };
+
+        return {
+            message: `Sure you want to add "${current.title}" to the library? (yes)`,
+            markup: { force_reply: true as const },
+        };
     }
 
     private async getMyShows() {
