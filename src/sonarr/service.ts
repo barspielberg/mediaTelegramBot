@@ -9,7 +9,7 @@ import {
 import * as api from './api.ts';
 import { Series } from './models.ts';
 
-type Response = {
+type TelegramRes = {
     message: string;
     markup?:
         | InlineKeyboardMarkup
@@ -17,6 +17,8 @@ type Response = {
         | ReplyKeyboardRemove
         | ForceReply;
 };
+
+type Response = TelegramRes | string;
 
 export const prefix = 'sonarr:';
 
@@ -32,19 +34,27 @@ function displaySeries(s: Series) {
     return res;
 }
 
+function stringToMessage(res: Response): TelegramRes {
+    if (typeof res === 'string') {
+        return { message: res };
+    }
+    return res;
+}
+
 export const keys = {
     health: 'OK?',
     search: 'Search',
     more: 'Next >>',
     grub: 'Grub',
+    list: 'List',
 } as const;
 
 type Action = typeof keys[keyof typeof keys];
 
-type ActionResponse = Promise<Response | undefined> | Response | undefined;
+type ActionResponse = Promise<Response> | Response;
 
 class ChatHandler {
-    handelText?: (text: string) => Promise<Response>;
+    handelText?: (text: string) => Promise<TelegramRes>;
     searchResults?: Series[];
     currentIndex = -1;
 
@@ -53,10 +63,12 @@ class ChatHandler {
     actions: Record<Action, () => ActionResponse> = {
         [keys.health]: async () => {
             const healthy = await updateClient(this.chatId, api.health());
-            return { message: healthy ? '👌' : '😥' };
+            return healthy ? '👌' : '😥';
         },
         [keys.search]: () => {
-            this.handelText = this.waitForShowName;
+            this.handelText = async (text) =>
+                stringToMessage(await this.waitForShowName(text));
+
             return {
                 message: 'Search for..?',
                 markup: { force_reply: true },
@@ -64,6 +76,9 @@ class ChatHandler {
         },
         [keys.more]: () => this.replaySearchResult(),
         [keys.grub]: () => this.grubCurrentSeries(),
+        [keys.list]: () => {
+            return 'list';
+        },
     };
 
     private waitForShowName = async (text: string) => {
@@ -76,14 +91,14 @@ class ChatHandler {
             this.currentIndex = -1;
             return this.replaySearchResult();
         } catch (_) {
-            return { message: '😵' };
+            return '😵';
         }
     };
 
     private replaySearchResult() {
         const current = this.getNextSearch();
         if (!current) {
-            return { message: 'no result to show' };
+            return 'No result to show';
         }
         const message = displaySeries(current);
         return {
@@ -109,17 +124,13 @@ class ChatHandler {
         const { searchResults, currentIndex } = this;
         const current = searchResults?.[currentIndex];
         if (!current || current.id) {
-            return {
-                message: current
-                    ? 'You already have that 👍'
-                    : 'cant found series to grub',
-            };
+            return current
+                ? 'You already have that 👍'
+                : 'cant found series to grub';
         }
         const res = await updateClient(this.chatId, api.add(current));
 
-        return {
-            message: res ? '👌' : '😿',
-        };
+        return res ? '👌' : '😿';
     }
 }
 
@@ -129,11 +140,11 @@ export function keyboard(actions: Action[]) {
     ]);
 }
 
-export function handleAction(option: string, chatId?: number) {
+export async function handleAction(option: string, chatId?: number) {
     const key = option.split(prefix)[1] as Action;
     if (!chatId) {
         return;
     }
     chatHandlers[chatId] ??= new ChatHandler(chatId);
-    return chatHandlers[chatId].actions[key]?.();
+    return stringToMessage(await chatHandlers[chatId].actions[key]?.());
 }
