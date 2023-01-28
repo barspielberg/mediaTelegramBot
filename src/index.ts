@@ -16,7 +16,7 @@ bot.command('sonarr', (ctx) => {
 });
 
 bot.on('message:text', async (ctx) => {
-    const { handelText } = sonarr.chatHandlers[ctx.chat.id] ?? {};
+    const { handelText } = sonarr.getChatHandler(ctx.chat.id);
     if (!handelText) {
         return;
     }

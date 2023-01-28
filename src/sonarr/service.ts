@@ -32,11 +32,13 @@ type Action = typeof keys[keyof typeof keys];
 type ActionResponse = Promise<Response> | Response;
 
 class ChatHandler {
-    handelText?: (text: string) => Promise<Response>;
+    handelText?: (text: string) => ActionResponse;
     searchResults?: Series[];
     currentIndex = -1;
 
-    constructor(private readonly chatId: number) {}
+    constructor(private readonly chatId: number) {
+        this.setDefaultTextHandling();
+    }
 
     actions: Record<Action, () => ActionResponse> = {
         [keys.health]: async () => {
@@ -44,7 +46,10 @@ class ChatHandler {
             return healthy ? '👌' : '😥';
         },
         [keys.search]: () => {
-            this.handelText = this.waitForShowName;
+            this.handelText = (text) => {
+                this.setDefaultTextHandling();
+                return this.handelShowName(text);
+            };
 
             return {
                 message: 'Search for..?',
@@ -56,8 +61,7 @@ class ChatHandler {
         [keys.list]: () => this.getMyShows(),
     };
 
-    private waitForShowName = async (text: string) => {
-        this.stopWaiting();
+    private async handelShowName(text: string) {
         try {
             this.searchResults = await this.updateProgress(api.search(text));
             this.currentIndex = -1;
@@ -65,7 +69,7 @@ class ChatHandler {
         } catch (_) {
             return '😵';
         }
-    };
+    }
 
     private replaySearchResult() {
         const current = this.getNextSearch();
@@ -88,9 +92,16 @@ class ChatHandler {
         return searchResults[++this.currentIndex];
     }
 
-    private stopWaiting() {
-        this.handelText = undefined;
+    private setDefaultTextHandling() {
+        this.handelText = this.defaultHandleText;
     }
+
+    private defaultHandleText = (text: string) => {
+        if (text.startsWith('/')) {
+            return 'ok';
+        }
+        return this.handelShowName(text);
+    };
 
     private async grubCurrentSeries() {
         const { searchResults, currentIndex } = this;
@@ -126,11 +137,15 @@ export function keyboard(actions: Action[]) {
     ]);
 }
 
+export function getChatHandler(chatId: number) {
+    chatHandlers[chatId] ??= new ChatHandler(chatId);
+    return chatHandlers[chatId];
+}
+
 export function handleAction(option: string, chatId?: number) {
     const key = option.split(prefix)[1] as Action;
     if (!chatId) {
         return;
     }
-    chatHandlers[chatId] ??= new ChatHandler(chatId);
-    return chatHandlers[chatId].actions[key]?.();
+    return getChatHandler(chatId).actions[key]?.();
 }
