@@ -1,6 +1,6 @@
 import { bot } from '../bot.ts';
 import { InlineKeyboard } from '../pkg/grammy.ts';
-import { TelegramRes, updateLongProcess } from '../utils.ts';
+import { formatFileSize, TelegramRes, updateLongProcess } from '../utils.ts';
 import * as api from './api.ts';
 import { Series } from './models.ts';
 
@@ -26,6 +26,7 @@ export const keys = {
     more: 'Next >>',
     grub: 'Grub',
     list: 'List',
+    info: 'Info',
 } as const;
 
 type Action = typeof keys[keyof typeof keys];
@@ -60,6 +61,7 @@ class ChatHandler {
         [keys.more]: (index) => this.displayNextSearch(index),
         [keys.grub]: (index) => this.grubCurrentSeries(index),
         [keys.list]: () => this.getMyShows(),
+        [keys.info]: (index) => this.getShowInfo(index),
     };
 
     private async handelShowName(text: string) {
@@ -72,14 +74,25 @@ class ChatHandler {
     }
 
     private async handelShowIndex(index: number) {
-        if (!this.myShows) {
-            await this.getMyShows();
-        }
-        const series = this.myShows?.[index];
-        if (!series) {
-            return '🤷🏻‍♂';
-        }
-        return displaySeries(series);
+        const series = await this.getMyShow(index);
+        return series
+            ? {
+                  message: displaySeries(series),
+                  markup: keyboard([`${keys.info}:${index}`]),
+              }
+            : '🤷🏻‍♂';
+    }
+
+    private async getShowInfo(index?: number | string) {
+        index = Number(index);
+        const series = await this.getMyShow(index);
+        let info = `Status: ${series?.status}\n`;
+        info += `Network: ${series?.network}\n`;
+        info += `Episodes: ${series?.statistics.episodeCount} / ${series?.statistics.totalEpisodeCount}\n`;
+        info += `${formatFileSize(series?.statistics.sizeOnDisk)} (${
+            series?.statistics.episodeFileCount
+        } episode files)\n`;
+        return series ? info : '🤷🏻‍♂';
     }
 
     private displayNextSearch(index?: string | number) {
@@ -136,6 +149,13 @@ class ChatHandler {
             console.error(error);
             return '😓';
         }
+    }
+
+    private async getMyShow(index: number) {
+        if (!this.myShows) {
+            await this.getMyShows();
+        }
+        return this.myShows?.[index];
     }
 
     private updateProgress<T>(promise: Promise<T>) {
