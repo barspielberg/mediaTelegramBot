@@ -4,7 +4,7 @@ import { Bot } from './pkg/grammy.ts';
 export const bot = new Bot(config.BOT_TOKEN);
 const { api } = bot;
 
-export async function updateClient<T>(
+export async function updateLongProcess<T>(
     chatId: number,
     promise: Promise<T>
 ): Promise<T> {

@@ -1,4 +1,4 @@
-import { updateClient } from '../bot.ts';
+import { updateLongProcess } from '../bot.ts';
 import {
     ForceReply,
     InlineKeyboard,
@@ -62,7 +62,7 @@ class ChatHandler {
 
     actions: Record<Action, () => ActionResponse> = {
         [keys.health]: async () => {
-            const healthy = await updateClient(this.chatId, api.health());
+            const healthy = await this.updateProgress(api.health());
             return healthy ? '👌' : '😥';
         },
         [keys.search]: () => {
@@ -84,10 +84,7 @@ class ChatHandler {
     private waitForShowName = async (text: string) => {
         this.stopWaiting();
         try {
-            this.searchResults = await updateClient(
-                this.chatId,
-                api.search(text)
-            );
+            this.searchResults = await this.updateProgress(api.search(text));
             this.currentIndex = -1;
             return this.replaySearchResult();
         } catch (_) {
@@ -128,9 +125,13 @@ class ChatHandler {
                 ? 'You already have that 👍'
                 : 'cant found series to grub';
         }
-        const res = await updateClient(this.chatId, api.add(current));
+        const res = await this.updateProgress(api.add(current));
 
         return res ? '👌' : '😿';
+    }
+
+    private updateProgress<T>(promise: Promise<T>) {
+        return updateLongProcess(this.chatId, promise);
     }
 }
 
