@@ -35,7 +35,8 @@ type ActionResponse = Promise<Response> | Response;
 class ChatHandler {
     handelText?: (text: string) => ActionResponse;
     searchResults?: Series[];
-    currentIndex = -1;
+    currentSearchIndex = -1;
+    myShows?: Series[];
 
     constructor(private readonly chatId: number) {
         this.setDefaultTextHandling();
@@ -57,7 +58,7 @@ class ChatHandler {
                 markup: { force_reply: true },
             };
         },
-        [keys.more]: () => this.replaySearchResult(),
+        [keys.more]: () => this.displayNextSearch(),
         [keys.grub]: () => this.grubCurrentSeries(),
         [keys.list]: () => this.getMyShows(),
     };
@@ -65,14 +66,25 @@ class ChatHandler {
     private async handelShowName(text: string) {
         try {
             this.searchResults = await this.updateProgress(api.search(text));
-            this.currentIndex = -1;
-            return this.replaySearchResult();
+            this.currentSearchIndex = -1;
+            return this.displayNextSearch();
         } catch (_) {
             return '😵';
         }
     }
 
-    private replaySearchResult() {
+    private async handelShowIndex(index: number) {
+        if (!this.myShows) {
+            await this.getMyShows();
+        }
+        const series = this.myShows?.[index];
+        if (!series) {
+            return '🤷🏻‍♂';
+        }
+        return displaySeries(series);
+    }
+
+    private displayNextSearch() {
         const current = this.getNextSearch();
         if (!current) {
             return 'No result to show';
@@ -90,7 +102,7 @@ class ChatHandler {
         if (!searchResults) {
             return undefined;
         }
-        return searchResults[++this.currentIndex];
+        return searchResults[++this.currentSearchIndex];
     }
 
     private setDefaultTextHandling() {
@@ -99,15 +111,19 @@ class ChatHandler {
 
     private defaultHandleText = async (text: string) => {
         if (text.startsWith('/')) {
-            return 'ok';
+            const index = Number(text.slice(1));
+            if (Number.isInteger(index)) {
+                return this.handelShowIndex(index);
+            }
+            return '😕';
         }
         await bot.api.sendMessage(this.chatId, `Searching "${text}"...`);
         return this.handelShowName(text);
     };
 
     private async grubCurrentSeries() {
-        const { searchResults, currentIndex } = this;
-        const current = searchResults?.[currentIndex];
+        const { searchResults, currentSearchIndex } = this;
+        const current = searchResults?.[currentSearchIndex];
         if (!current || current.id) {
             return current
                 ? 'You already have that 👍'
@@ -121,6 +137,7 @@ class ChatHandler {
     private async getMyShows() {
         try {
             const series = await this.updateProgress(api.getAllMy());
+            this.myShows = series;
             return series.map((s, index) => `/${index} ${s.title}`).join('\n');
         } catch (error) {
             console.error(error);
