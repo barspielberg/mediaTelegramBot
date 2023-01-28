@@ -11,7 +11,7 @@ export const prefix = 'sonarr:';
 export const chatHandlers: Record<number, ChatHandler> = {};
 
 function displaySeries(s: Series) {
-    let res = `${s.title} ${s.year || ''} `;
+    let res = `${s.id ? '✅' : ''} ${s.title} ${s.year || ''} `;
     if (s.imdbId) {
         res += `\nhttps://www.imdb.com/title/${s.imdbId}`;
     } else if (s.remotePoster) {
@@ -133,7 +133,7 @@ class ChatHandler {
         const message = displaySeries(current);
         return {
             message,
-            markup: keyboard([`${keys.more}:${index}`, `${keys.grub}:${index}`]),
+            markup: keyboard([`${keys.more}:${index}`, current.id ? `${keys.info}:${current.id}` : `${keys.grub}:${index}`]),
         };
     }
 
