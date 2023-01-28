@@ -1,3 +1,4 @@
+import { bot } from '../bot.ts';
 import { InlineKeyboard } from '../pkg/grammy.ts';
 import { TelegramRes, updateLongProcess } from '../utils.ts';
 import * as api from './api.ts';
@@ -96,10 +97,11 @@ class ChatHandler {
         this.handelText = this.defaultHandleText;
     }
 
-    private defaultHandleText = (text: string) => {
+    private defaultHandleText = async (text: string) => {
         if (text.startsWith('/')) {
             return 'ok';
         }
+        await bot.api.sendMessage(this.chatId, `Searching "${text}"...`);
         return this.handelShowName(text);
     };
 
