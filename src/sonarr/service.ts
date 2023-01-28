@@ -23,20 +23,20 @@ export const prefix = 'sonarr:';
 export const chatHandlers: Record<number, ChatHandler> = {};
 
 function displaySeries(s: Series) {
-    let res = `${s.title} ${s.year} `;
+    let res = `${s.title} ${s.year ?? ''} `;
     if (s.imdbId) {
         res += `\nhttps://www.imdb.com/title/${s.imdbId}`;
-    } else {
+    } else if (s.remotePoster) {
         res += `\n${s.remotePoster}`;
     }
     return res;
 }
 
-const keys = {
-    health: 'ok?',
-    search: 'new show',
-    more: 'next >>',
-    grub: 'grub',
+export const keys = {
+    health: 'OK?',
+    search: 'Search',
+    more: 'Next >>',
+    grub: 'Grub',
 } as const;
 
 type Action = typeof keys[keyof typeof keys];
@@ -58,7 +58,7 @@ class ChatHandler {
         [keys.search]: () => {
             this.handelText = this.waitForShowName;
             return {
-                message: 'what to search?',
+                message: 'Search for..?',
                 markup: { force_reply: true },
             };
         },

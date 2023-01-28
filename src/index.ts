@@ -6,7 +6,7 @@ bot.use(middleware.log, middleware.auth);
 
 bot.command('sonarr', (ctx) => {
     ctx.reply('Sonarr options:', {
-        reply_markup: sonarr.keyboard(['ok?', 'new show']),
+        reply_markup: sonarr.keyboard([sonarr.keys.health, sonarr.keys.search]),
     });
 });
 
@@ -35,7 +35,7 @@ bot.start({ drop_pending_updates: true }).catch(console.error);
 console.log('started');
 
 await bot.api.setMyCommands([
-    { command: 'sonarr', description: 'show tv show options' },
+    { command: 'sonarr', description: 'Tv show options' },
 ]);
 console.log('send commands');
 
