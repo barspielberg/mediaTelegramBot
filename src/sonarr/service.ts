@@ -35,14 +35,13 @@ type ActionResponse = Promise<Response> | Response;
 class ChatHandler {
     handelText?: (text: string) => ActionResponse;
     searchResults?: Series[];
-    currentSearchIndex = -1;
     myShows?: Series[];
 
     constructor(private readonly chatId: number) {
         this.setDefaultTextHandling();
     }
 
-    actions: Record<Action, () => ActionResponse> = {
+    actions: Record<Action, (data?: string) => ActionResponse> = {
         [keys.health]: async () => {
             const healthy = await this.updateProgress(api.health());
             return healthy ? '👌' : '😥';
@@ -58,16 +57,15 @@ class ChatHandler {
                 markup: { force_reply: true },
             };
         },
-        [keys.more]: () => this.displayNextSearch(),
-        [keys.grub]: () => this.grubCurrentSeries(),
+        [keys.more]: (index) => this.displayNextSearch(index),
+        [keys.grub]: (index) => this.grubCurrentSeries(index),
         [keys.list]: () => this.getMyShows(),
     };
 
     private async handelShowName(text: string) {
         try {
             this.searchResults = await this.updateProgress(api.search(text));
-            this.currentSearchIndex = -1;
-            return this.displayNextSearch();
+            return this.displayNextSearch(-1);
         } catch (_) {
             return '😵';
         }
@@ -84,25 +82,20 @@ class ChatHandler {
         return displaySeries(series);
     }
 
-    private displayNextSearch() {
-        const current = this.getNextSearch();
+    private displayNextSearch(index?: string | number) {
+        index = Number(index);
+        const current = this.searchResults?.[++index];
         if (!current) {
             return 'No result to show';
         }
         const message = displaySeries(current);
         return {
             message,
-            markup: keyboard([keys.more, keys.grub]),
+            markup: keyboard([
+                `${keys.more}:${index}`,
+                `${keys.grub}:${index}`,
+            ]),
         };
-    }
-
-    private getNextSearch() {
-        const { searchResults } = this;
-
-        if (!searchResults) {
-            return undefined;
-        }
-        return searchResults[++this.currentSearchIndex];
     }
 
     private setDefaultTextHandling() {
@@ -121,9 +114,9 @@ class ChatHandler {
         return this.handelShowName(text);
     };
 
-    private async grubCurrentSeries() {
-        const { searchResults, currentSearchIndex } = this;
-        const current = searchResults?.[currentSearchIndex];
+    private async grubCurrentSeries(index?: string | number) {
+        index = Number(index);
+        const current = this.searchResults?.[index];
         if (!current || current.id) {
             return current
                 ? 'You already have that 👍'
@@ -150,9 +143,12 @@ class ChatHandler {
     }
 }
 
-export function keyboard(actions: Action[]) {
+export function keyboard(actions: (Action | `${Action}:${string}`)[]) {
     return new InlineKeyboard([
-        actions.map((key) => ({ text: key, callback_data: prefix + key })),
+        actions.map((key) => ({
+            text: key.split(':')[0],
+            callback_data: prefix + key,
+        })),
     ]);
 }
 
@@ -162,9 +158,13 @@ export function getChatHandler(chatId: number) {
 }
 
 export function handleAction(option: string, chatId?: number) {
-    const key = option.split(prefix)[1] as Action;
+    const [_, key, data] = option.split(':') as [
+        string,
+        Action,
+        string | undefined
+    ];
     if (!chatId) {
         return;
     }
-    return getChatHandler(chatId).actions[key]?.();
+    return getChatHandler(chatId).actions[key]?.(data);
 }
