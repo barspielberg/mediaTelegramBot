@@ -76,9 +76,7 @@ class ChatHandler {
         },
         [keys.more]: () => this.replaySearchResult(),
         [keys.grub]: () => this.grubCurrentSeries(),
-        [keys.list]: () => {
-            return 'list';
-        },
+        [keys.list]: () => this.getMyShows(),
     };
 
     private waitForShowName = async (text: string) => {
@@ -128,6 +126,16 @@ class ChatHandler {
         const res = await this.updateProgress(api.add(current));
 
         return res ? '👌' : '😿';
+    }
+
+    private async getMyShows() {
+        try {
+            const series = await this.updateProgress(api.getAllMy());
+            return series.map((s, index) => `/${index} ${s.title}`).join('\n');
+        } catch (error) {
+            console.error(error);
+            return '😓';
+        }
     }
 
     private updateProgress<T>(promise: Promise<T>) {

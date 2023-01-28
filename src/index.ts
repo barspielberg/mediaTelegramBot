@@ -6,7 +6,11 @@ bot.use(middleware.log, middleware.auth);
 
 bot.command('sonarr', (ctx) => {
     ctx.reply('Sonarr options:', {
-        reply_markup: sonarr.keyboard([sonarr.keys.health, sonarr.keys.search]),
+        reply_markup: sonarr.keyboard([
+            sonarr.keys.health,
+            sonarr.keys.search,
+            sonarr.keys.list,
+        ]),
     });
 });
 

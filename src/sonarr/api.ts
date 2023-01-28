@@ -41,7 +41,7 @@ async function post(url: string, payload: any) {
 
 export async function health() {
     try {
-        await get(baseURL + '/health');
+        await get(`${baseURL}/health`);
         return true;
     } catch (error) {
         console.error(error);
@@ -86,4 +86,8 @@ export async function add(
     }
 
     return false;
+}
+
+export function getAllMy() {
+    return get<Series[]>(`${baseURL}/series`);
 }
