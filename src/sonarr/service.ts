@@ -52,8 +52,8 @@ class ChatHandler {
         [keys.more]: (index) => this.displayNextSearch(index),
         [keys.grub]: (index) => this.grubCurrentSeries(index),
         [keys.list]: () => this.getMyShows(),
-        [keys.info]: (index) => this.getShowInfo(index),
-        [keys.delete]: (index) => this.deleteShow(index),
+        [keys.info]: (id) => this.getShowInfo(id),
+        [keys.delete]: (id) => this.deleteShow(id),
     };
 
     private replayToSearch() {
@@ -77,19 +77,19 @@ class ChatHandler {
         }
     }
 
-    private async handelShowIndex(index: number) {
-        const series = await this.getMyShow(index);
+    private async handelShowId(id: number) {
+        const series = await this.getMyShow(id);
         return series
             ? {
                   message: displaySeries(series),
-                  markup: keyboard([`${keys.info}:${index}`, `${keys.delete}:${index}`]),
+                  markup: keyboard([`${keys.info}:${series.id}`, `${keys.delete}:${series.id}`]),
               }
             : '🤷🏻‍♂';
     }
 
-    private async getShowInfo(index?: number | string) {
-        index = Number(index);
-        const series = await this.getMyShow(index);
+    private async getShowInfo(id?: number | string) {
+        id = Number(id);
+        const series = await this.getMyShow(id);
 
         const seasonData = series?.seasons.map((s) => ` - Season ${s.seasonNumber} ${s.monitored ? '🧐' : '🙈'}\n`).join('');
 
@@ -103,9 +103,9 @@ class ChatHandler {
         return series ? info : '🤷🏻‍♂';
     }
 
-    private async deleteShow(index?: number | string) {
-        index = Number(index);
-        const series = await this.getMyShow(index);
+    private async deleteShow(id?: number | string) {
+        id = Number(id);
+        const series = await this.getMyShow(id);
         if (!series?.id) {
             return 'Could not find this show';
         }
@@ -143,9 +143,9 @@ class ChatHandler {
 
     private defaultHandleText = async (text: string) => {
         if (text.startsWith('/')) {
-            const index = Number(text.slice(1));
-            if (Number.isInteger(index)) {
-                return this.handelShowIndex(index);
+            const id = Number(text.slice(1));
+            if (Number.isInteger(id)) {
+                return this.handelShowId(id);
             }
             return '😕';
         }
@@ -180,18 +180,18 @@ class ChatHandler {
         try {
             const series = await this.updateProgress(api.getAllMy());
             this.myShows = series;
-            return series.map((s, index) => `/${index} ${s.title}`).join('\n');
+            return series.map((s) => `/${s.id} ${s.title}`).join('\n');
         } catch (error) {
             console.error(error);
             return '😓';
         }
     }
 
-    private async getMyShow(index: number) {
+    private async getMyShow(id: number) {
         if (!this.myShows) {
             await this.getMyShows();
         }
-        return this.myShows?.[index];
+        return this.myShows?.find((s) => s.id === id);
     }
 
     private updateProgress<T>(promise: Promise<T>) {
