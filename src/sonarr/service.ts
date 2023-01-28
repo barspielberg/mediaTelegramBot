@@ -107,8 +107,19 @@ class ChatHandler {
         if (!series?.id) {
             return 'Could not find this show';
         }
-        const success = await api.deleteSeries(series.id);
-        return success ? '🆗' : 'Something want wrong😿';
+        this.handelText = async (text) => {
+            this.setDefaultTextHandling();
+            if (text.toLowerCase() === 'yes') {
+                const success = await api.deleteSeries(series.id!);
+                return success ? '🆗' : 'Something went wrong😿';
+            }
+            return '🫶';
+        };
+
+        return {
+            message: `Are you sure you want to delete ${series.title}? (yes/no)`,
+            markup: { force_reply: true as const },
+        };
     }
 
     private displayNextSearch(index?: string | number) {
