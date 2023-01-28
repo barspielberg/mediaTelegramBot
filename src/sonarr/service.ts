@@ -1,22 +1,7 @@
-import { updateLongProcess } from '../bot.ts';
-import {
-    ForceReply,
-    InlineKeyboard,
-    InlineKeyboardMarkup,
-    ReplyKeyboardMarkup,
-    ReplyKeyboardRemove,
-} from '../pkg/grammy.ts';
+import { InlineKeyboard } from '../pkg/grammy.ts';
+import { TelegramRes, updateLongProcess } from '../utils.ts';
 import * as api from './api.ts';
 import { Series } from './models.ts';
-
-type TelegramRes = {
-    message: string;
-    markup?:
-        | InlineKeyboardMarkup
-        | ReplyKeyboardMarkup
-        | ReplyKeyboardRemove
-        | ForceReply;
-};
 
 type Response = TelegramRes | string;
 
@@ -34,13 +19,6 @@ function displaySeries(s: Series) {
     return res;
 }
 
-function stringToMessage(res: Response): TelegramRes {
-    if (typeof res === 'string') {
-        return { message: res };
-    }
-    return res;
-}
-
 export const keys = {
     health: 'OK?',
     search: 'Search',
@@ -54,7 +32,7 @@ type Action = typeof keys[keyof typeof keys];
 type ActionResponse = Promise<Response> | Response;
 
 class ChatHandler {
-    handelText?: (text: string) => Promise<TelegramRes>;
+    handelText?: (text: string) => Promise<Response>;
     searchResults?: Series[];
     currentIndex = -1;
 
@@ -66,8 +44,7 @@ class ChatHandler {
             return healthy ? '👌' : '😥';
         },
         [keys.search]: () => {
-            this.handelText = async (text) =>
-                stringToMessage(await this.waitForShowName(text));
+            this.handelText = this.waitForShowName;
 
             return {
                 message: 'Search for..?',
@@ -149,11 +126,11 @@ export function keyboard(actions: Action[]) {
     ]);
 }
 
-export async function handleAction(option: string, chatId?: number) {
+export function handleAction(option: string, chatId?: number) {
     const key = option.split(prefix)[1] as Action;
     if (!chatId) {
         return;
     }
     chatHandlers[chatId] ??= new ChatHandler(chatId);
-    return stringToMessage(await chatHandlers[chatId].actions[key]?.());
+    return chatHandlers[chatId].actions[key]?.();
 }

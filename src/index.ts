@@ -1,6 +1,7 @@
 import { bot } from './bot.ts';
 import * as middleware from './middleware.ts';
 import { sonarr } from './sonarr/index.ts';
+import { stringToMessage } from './utils.ts';
 
 bot.use(middleware.log, middleware.auth);
 
@@ -19,18 +20,24 @@ bot.on('message:text', async (ctx) => {
     if (!handelText) {
         return;
     }
-    const { message, markup } = await handelText(ctx.message.text);
-    ctx.reply(message, {
-        reply_markup: markup,
-        parse_mode: 'HTML',
-    });
+    const res = await handelText(ctx.message.text);
+    if (res) {
+        const { message, markup } = stringToMessage(res);
+        ctx.reply(message, {
+            reply_markup: markup,
+            parse_mode: 'HTML',
+        });
+    }
 });
 
 bot.on('callback_query', async (ctx) => {
     const { data } = ctx.update.callback_query as { data: string };
     if (data.startsWith(sonarr.prefix)) {
         const res = await sonarr.handleAction(data, ctx.chat?.id);
-        res && ctx.reply(res.message, { reply_markup: res.markup });
+        if (res) {
+            const { message, markup } = stringToMessage(res);
+            ctx.reply(message, { reply_markup: markup });
+        }
     }
     ctx.answerCallbackQuery();
 });
