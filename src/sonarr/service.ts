@@ -86,12 +86,16 @@ class ChatHandler {
     private async getShowInfo(index?: number | string) {
         index = Number(index);
         const series = await this.getMyShow(index);
+
+        const seasonData = series?.seasons.map((s) => ` - Season ${s.seasonNumber} ${s.monitored ? '🧐' : '🙈'}\n`).join('');
+
         let info = `Status: ${series?.status}\n`;
         info += `Network: ${series?.network}\n`;
+        info += series?.monitored ? 'Monitored:\n' + seasonData : `Not monitored 🙈\n`;
+        info += '\n';
         info += `Episodes: ${series?.statistics.episodeCount} / ${series?.statistics.totalEpisodeCount}\n`;
-        info += `${formatFileSize(series?.statistics.sizeOnDisk)} (${
-            series?.statistics.episodeFileCount
-        } episode files)\n`;
+        info += `${formatFileSize(series?.statistics.sizeOnDisk)} (${series?.statistics.episodeFileCount} episode files)\n`;
+
         return series ? info : '🤷🏻‍♂';
     }
 
@@ -104,10 +108,7 @@ class ChatHandler {
         const message = displaySeries(current);
         return {
             message,
-            markup: keyboard([
-                `${keys.more}:${index}`,
-                `${keys.grub}:${index}`,
-            ]),
+            markup: keyboard([`${keys.more}:${index}`, `${keys.grub}:${index}`]),
         };
     }
 
@@ -131,9 +132,7 @@ class ChatHandler {
         index = Number(index);
         const current = this.searchResults?.[index];
         if (!current || current.id) {
-            return current
-                ? 'You already have that 👍'
-                : 'cant found series to grub';
+            return current ? 'You already have that 👍' : 'cant found series to grub';
         }
         const res = await this.updateProgress(api.add(current));
 
@@ -178,11 +177,7 @@ export function getChatHandler(chatId: number) {
 }
 
 export function handleAction(option: string, chatId?: number) {
-    const [_, key, data] = option.split(':') as [
-        string,
-        Action,
-        string | undefined
-    ];
+    const [_, key, data] = option.split(':') as [string, Action, string | undefined];
     if (!chatId) {
         return;
     }

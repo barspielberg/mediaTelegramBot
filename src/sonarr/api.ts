@@ -5,10 +5,7 @@ const baseURL = `${config.BASE_URL}:8989/api/v3`;
 const key = config.SONARR_KEY;
 
 const rootFolderPath = '/tv/';
-const fetchTimeout = async (
-    url: string,
-    init?: RequestInit & { timeout?: number }
-) => {
+const fetchTimeout = async (url: string, init?: RequestInit & { timeout?: number }) => {
     const controller = new AbortController();
     const id = setTimeout(() => {
         controller.abort();

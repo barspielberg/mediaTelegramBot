@@ -7,11 +7,7 @@ bot.use(middleware.log, middleware.auth);
 
 bot.command('sonarr', (ctx) => {
     ctx.reply('Sonarr options:', {
-        reply_markup: sonarr.keyboard([
-            sonarr.keys.health,
-            sonarr.keys.search,
-            sonarr.keys.list,
-        ]),
+        reply_markup: sonarr.keyboard([sonarr.keys.health, sonarr.keys.search, sonarr.keys.list]),
     });
 });
 
@@ -45,9 +41,7 @@ bot.on('callback_query', async (ctx) => {
 bot.start({ drop_pending_updates: true }).catch(console.error);
 console.log('started');
 
-await bot.api.setMyCommands([
-    { command: 'sonarr', description: 'Tv show options' },
-]);
+await bot.api.setMyCommands([{ command: 'sonarr', description: 'Tv show options' }]);
 console.log('send commands');
 
 // Enable graceful stop

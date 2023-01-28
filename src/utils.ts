@@ -1,26 +1,14 @@
-import {
-    ForceReply,
-    InlineKeyboardMarkup,
-    ReplyKeyboardMarkup,
-    ReplyKeyboardRemove,
-} from './pkg/grammy.ts';
+import { ForceReply, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove } from './pkg/grammy.ts';
 import { bot } from './bot.ts';
 
 export type TelegramRes = {
     message: string;
-    markup?:
-        | InlineKeyboardMarkup
-        | ReplyKeyboardMarkup
-        | ReplyKeyboardRemove
-        | ForceReply;
+    markup?: InlineKeyboardMarkup | ReplyKeyboardMarkup | ReplyKeyboardRemove | ForceReply;
 };
 
 const { api } = bot;
 
-export async function updateLongProcess<T>(
-    chatId: number,
-    promise: Promise<T>
-): Promise<T> {
+export async function updateLongProcess<T>(chatId: number, promise: Promise<T>): Promise<T> {
     let messageId: number | undefined;
 
     const timeout = setTimeout(async () => {
@@ -39,10 +27,7 @@ export async function updateLongProcess<T>(
         return res;
     }
     api.editMessageText(chatId, messageId, 'Done! 🦾').then(() => {
-        setTimeout(
-            () => api.deleteMessage(chatId, messageId!).catch(console.error),
-            3000
-        );
+        setTimeout(() => api.deleteMessage(chatId, messageId!).catch(console.error), 3000);
     });
 
     return res;
