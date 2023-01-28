@@ -88,3 +88,18 @@ export async function add(
 export function getAllMy() {
     return get<Series[]>(`${baseURL}/series`);
 }
+
+export async function deleteSeries(id: number) {
+    try {
+        const res = await fetchTimeout(`${baseURL}/series/${id}?deleteFiles=true`, {
+            method: 'DELETE',
+        });
+        if (res.ok) {
+            return true;
+        }
+        throw res;
+    } catch (error) {
+        console.error(error);
+    }
+    return false;
+}

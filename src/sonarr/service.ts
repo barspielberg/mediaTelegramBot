@@ -27,6 +27,7 @@ export const keys = {
     grub: 'Grub',
     list: 'List',
     info: 'Info',
+    delete: 'Delete',
 } as const;
 
 type Action = typeof keys[keyof typeof keys];
@@ -62,6 +63,7 @@ class ChatHandler {
         [keys.grub]: (index) => this.grubCurrentSeries(index),
         [keys.list]: () => this.getMyShows(),
         [keys.info]: (index) => this.getShowInfo(index),
+        [keys.delete]: (index) => this.deleteShow(index),
     };
 
     private async handelShowName(text: string) {
@@ -78,7 +80,7 @@ class ChatHandler {
         return series
             ? {
                   message: displaySeries(series),
-                  markup: keyboard([`${keys.info}:${index}`]),
+                  markup: keyboard([`${keys.info}:${index}`, `${keys.delete}:${index}`]),
               }
             : '🤷🏻‍♂';
     }
@@ -87,7 +89,7 @@ class ChatHandler {
         index = Number(index);
         const series = await this.getMyShow(index);
 
-        const seasonData = series?.seasons.map((s) => ` - Season ${s.seasonNumber} ${s.monitored ? '🧐' : '🙈'}\n`).join('');
+        const seasonData = series?.seasons.map((s) => ` - Season ${s.seasonNumber} ${s.monitored ? '🕵️' : '🙈'}\n`).join('');
 
         let info = `Status: ${series?.status}\n`;
         info += `Network: ${series?.network}\n`;
@@ -97,6 +99,16 @@ class ChatHandler {
         info += `${formatFileSize(series?.statistics.sizeOnDisk)} (${series?.statistics.episodeFileCount} episode files)\n`;
 
         return series ? info : '🤷🏻‍♂';
+    }
+
+    private async deleteShow(index?: number | string) {
+        index = Number(index);
+        const series = await this.getMyShow(index);
+        if (!series?.id) {
+            return 'Could not find this show';
+        }
+        const success = await api.deleteSeries(series.id);
+        return success ? '🆗' : 'Something want wrong😿';
     }
 
     private displayNextSearch(index?: string | number) {
