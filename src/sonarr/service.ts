@@ -48,23 +48,25 @@ class ChatHandler {
             const healthy = await this.updateProgress(api.health());
             return healthy ? '👌' : '😥';
         },
-        [keys.search]: () => {
-            this.handelText = (text) => {
-                this.setDefaultTextHandling();
-                return this.handelShowName(text);
-            };
-
-            return {
-                message: 'Search for..?',
-                markup: { force_reply: true },
-            };
-        },
+        [keys.search]: () => this.replayToSearch(),
         [keys.more]: (index) => this.displayNextSearch(index),
         [keys.grub]: (index) => this.grubCurrentSeries(index),
         [keys.list]: () => this.getMyShows(),
         [keys.info]: (index) => this.getShowInfo(index),
         [keys.delete]: (index) => this.deleteShow(index),
     };
+
+    private replayToSearch() {
+        this.handelText = (text) => {
+            this.setDefaultTextHandling();
+            return this.handelShowName(text);
+        };
+
+        return {
+            message: 'Search for..?',
+            markup: { force_reply: true as const },
+        };
+    }
 
     private async handelShowName(text: string) {
         try {
@@ -89,7 +91,7 @@ class ChatHandler {
         index = Number(index);
         const series = await this.getMyShow(index);
 
-        const seasonData = series?.seasons.map((s) => ` - Season ${s.seasonNumber} ${s.monitored ? '🕵️' : '🙈'}\n`).join('');
+        const seasonData = series?.seasons.map((s) => ` - Season ${s.seasonNumber} ${s.monitored ? '🧐' : '🙈'}\n`).join('');
 
         let info = `Status: ${series?.status}\n`;
         info += `Network: ${series?.network}\n`;
