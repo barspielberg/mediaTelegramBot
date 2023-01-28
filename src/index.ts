@@ -1,5 +1,8 @@
 import { bot } from './bot.ts';
+import * as middleware from './middleware.ts';
 import { sonarr } from './sonarr/index.ts';
+
+bot.use(middleware.log, middleware.auth);
 
 bot.command('sonarr', (ctx) => {
     ctx.reply('Sonarr options:', {
@@ -21,7 +24,6 @@ bot.on('message:text', async (ctx) => {
 
 bot.on('callback_query', async (ctx) => {
     const { data } = ctx.update.callback_query as { data: string };
-    console.log('call', data);
     if (data.startsWith(sonarr.prefix)) {
         const res = await sonarr.handleAction(data, ctx.chat?.id);
         res && ctx.reply(res.message, { reply_markup: res.markup });
@@ -29,7 +31,7 @@ bot.on('callback_query', async (ctx) => {
     ctx.answerCallbackQuery();
 });
 
-bot.start({ drop_pending_updates: true });
+bot.start({ drop_pending_updates: true }).catch(console.error);
 console.log('started');
 
 await bot.api.setMyCommands([
