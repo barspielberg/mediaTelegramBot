@@ -1,4 +1,4 @@
-import { ForceReply, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove } from './pkg/grammy.ts';
+import { ForceReply, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove } from '../pkg/grammy.ts';
 import { bot } from './bot.ts';
 
 export type TelegramRes = {

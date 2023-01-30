@@ -1,4 +1,4 @@
-import { config } from './config.ts';
+import { config } from './common/config.ts';
 import { Middleware } from './pkg/grammy.ts';
 
 const allowedChats: number[] = JSON.parse(config.ALLOWED_CHATS);

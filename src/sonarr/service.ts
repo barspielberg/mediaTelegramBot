@@ -1,6 +1,6 @@
-import { bot } from '../bot.ts';
+import { bot } from '../common/bot.ts';
 import { InlineKeyboard } from '../pkg/grammy.ts';
-import { formatFileSize, TelegramRes, updateLongProcess } from '../utils.ts';
+import { formatFileSize, TelegramRes, updateLongProcess } from '../common/utils.ts';
 import * as api from './api.ts';
 import { Series } from './models.ts';
 

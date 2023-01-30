@@ -1,5 +1,5 @@
-import { config } from '../config.ts';
-import { Http } from '../httpReq.ts';
+import { Http } from '../common/httpReq.ts';
+import { config } from '../common/config.ts';
 import { AddOptions, Series } from './models.ts';
 
 const rootFolderPath = '/tv/';

@@ -1,7 +1,7 @@
-import { bot } from './bot.ts';
+import { bot } from './common/bot.ts';
 import * as middleware from './middleware.ts';
 import { sonarr } from './sonarr/index.ts';
-import { stringToMessage } from './utils.ts';
+import { stringToMessage } from './common/utils.ts';
 
 bot.use(middleware.log, middleware.auth);
 

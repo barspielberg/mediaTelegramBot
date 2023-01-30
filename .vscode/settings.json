@@ -1,6 +1,6 @@
 {
     "editor.formatOnSave": true,
-    "cSpell.words": ["sonarr"],
+    "cSpell.words": ["sonarr", "radarr"],
     "deno.enable": true,
     "deno.unstable": true
 }
