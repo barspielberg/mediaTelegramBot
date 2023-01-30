@@ -19,18 +19,25 @@ export async function updateLongProcess<T>(chatId: number, promise: Promise<T>):
             console.error(error);
         }
     }, 1000);
-    const res = await promise;
-
+    let res: T;
+    let err;
+    try {
+        res = await promise;
+    } catch (error) {
+        err = error;
+    }
     clearTimeout(timeout);
 
-    if (!messageId) {
-        return res;
+    if (messageId) {
+        (async () => {
+            await api.editMessageText(chatId, messageId, 'Done! 🦾').catch(console.error);
+            setTimeout(() => api.deleteMessage(chatId, messageId!).catch(console.error), 3000);
+        })();
     }
-    api.editMessageText(chatId, messageId, 'Done! 🦾').then(() => {
-        setTimeout(() => api.deleteMessage(chatId, messageId!).catch(console.error), 3000);
-    });
-
-    return res;
+    if (err) {
+        throw err;
+    }
+    return res!;
 }
 
 export function stringToMessage(res: TelegramRes | string): TelegramRes {
