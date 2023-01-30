@@ -1,49 +1,16 @@
 import { config } from '../config.ts';
+import { Http } from '../httpReq.ts';
 import { AddOptions, Series } from './models.ts';
 
-const baseURL = `${config.BASE_URL}:8989/api/v3`;
-const key = config.SONARR_KEY;
-
 const rootFolderPath = '/tv/';
-const fetchTimeout = async (url: string, init?: RequestInit & { timeout?: number }) => {
-    const controller = new AbortController();
-    const id = setTimeout(() => {
-        controller.abort();
-    }, init?.timeout ?? 5 * 1000);
-    try {
-        return await fetch(url, {
-            ...init,
-            signal: controller.signal,
-            headers: { ['x-api-key']: key },
-        });
-    } finally {
-        clearTimeout(id);
-    }
-};
+const http = new Http();
 
-async function get<T = unknown>(url: string) {
-    const res = await fetchTimeout(url);
-    if (!res.ok) {
-        const err = new Error(res.statusText);
-        throw Object.assign(err, { status: res.status });
-    }
-
-    const data: T = await res.json();
-    return data;
-}
-
-async function post(url: string, payload: any) {
-    const res = await fetchTimeout(url, {
-        headers: { 'Content-Type': 'application/json' },
-        method: 'POST',
-        body: JSON.stringify(payload),
-    });
-    return res;
-}
+http.key = config.SONARR_KEY;
+http.baseUrl = `${config.BASE_URL}:8989/api/v3`;
 
 export async function health() {
     try {
-        await get(`${baseURL}/health`);
+        await http.get('/health');
         return true;
     } catch (error) {
         console.error(error);
@@ -52,7 +19,7 @@ export async function health() {
 }
 
 export function search(name: string) {
-    return get<Series[]>(`${baseURL}/series/lookup?term=${name}`);
+    return http.get<Series[]>(`/series/lookup?term=${name}`);
 }
 
 export async function add(
@@ -77,7 +44,7 @@ export async function add(
     };
     const payload = { ...rest, ...defaults, addOption };
     try {
-        const res = await post(`${baseURL}/series/`, payload);
+        const res = await http.post('/series/', payload);
         if (res.ok && res.status === 201) {
             return true;
         }
@@ -93,18 +60,13 @@ export async function add(
 export function getMyList(id: number): Promise<Series>;
 export function getMyList(): Promise<Series[]>;
 export function getMyList(id?: number) {
-    return get(`${baseURL}/series/${id ?? ''}`);
+    return http.get(`/series/${id ?? ''}`);
 }
 
 export async function deleteSeries(id: number) {
     try {
-        const res = await fetchTimeout(`${baseURL}/series/${id}?deleteFiles=true`, {
-            method: 'DELETE',
-        });
-        if (res.ok) {
-            return true;
-        }
-        throw res;
+        await http.del(`/series/${id}?deleteFiles=true`);
+        return true;
     } catch (error) {
         console.error(error);
     }
