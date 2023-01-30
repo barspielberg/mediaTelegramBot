@@ -23,6 +23,11 @@ const fetchTimeout = async (url: string, init?: RequestInit & { timeout?: number
 
 async function get<T = unknown>(url: string) {
     const res = await fetchTimeout(url);
+    if (!res.ok) {
+        const err = new Error(res.statusText);
+        throw Object.assign(err, { status: res.status });
+    }
+
     const data: T = await res.json();
     return data;
 }
@@ -85,8 +90,10 @@ export async function add(
     return false;
 }
 
-export function getAllMy() {
-    return get<Series[]>(`${baseURL}/series`);
+export function getMyList(id: number): Promise<Series>;
+export function getMyList(): Promise<Series[]>;
+export function getMyList(id?: number) {
+    return get(`${baseURL}/series/${id ?? ''}`);
 }
 
 export async function deleteSeries(id: number) {

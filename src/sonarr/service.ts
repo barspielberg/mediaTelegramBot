@@ -178,7 +178,7 @@ class ChatHandler {
 
     private async getMyShows() {
         try {
-            const series = await this.updateProgress(api.getAllMy());
+            const series = await this.updateProgress(api.getMyList());
             this.myShows = series;
             return series.map((s) => `/${s.id} ${s.title}`).join('\n');
         } catch (error) {
@@ -188,10 +188,12 @@ class ChatHandler {
     }
 
     private async getMyShow(id: number) {
-        if (!this.myShows) {
-            await this.getMyShows();
+        try {
+            return await this.updateProgress(api.getMyList(id));
+        } catch (error) {
+            console.error(error);
+            return undefined;
         }
-        return this.myShows?.find((s) => s.id === id);
     }
 
     private updateProgress<T>(promise: Promise<T>) {
