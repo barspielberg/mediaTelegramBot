@@ -1,14 +1,13 @@
 import { bot } from '../common/bot.ts';
 import { InlineKeyboard } from '../pkg/grammy.ts';
-import { formatFileSize, TelegramRes, updateLongProcess } from '../common/utils.ts';
+import { formatFileSize, updateLongProcess } from '../common/utils.ts';
 import * as api from './api.ts';
 import { Series } from './models.ts';
-
-type Response = TelegramRes | string;
+import { ActionResponse } from '../common/types.ts';
 
 export const prefix = 'sonarr:';
 
-export const chatHandlers: Record<number, ChatHandler> = {};
+const chatHandlers: Record<number, ChatHandler> = {};
 
 function displaySeries(s: Series) {
     let res = `${s.id ? '✅' : ''} ${s.title} ${s.year || ''} `;
@@ -31,8 +30,6 @@ export const keys = {
 } as const;
 
 type Action = typeof keys[keyof typeof keys];
-
-type ActionResponse = Promise<Response> | Response;
 
 class ChatHandler {
     handelText?: (text: string) => ActionResponse;
