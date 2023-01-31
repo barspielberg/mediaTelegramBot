@@ -1,13 +1,10 @@
 import { bot } from '../common/bot.ts';
-import { InlineKeyboard } from '../pkg/grammy.ts';
-import { formatFileSize, updateLongProcess } from '../common/utils.ts';
+import { formatFileSize } from '../common/utils.ts';
 import * as api from './api.ts';
 import { Series } from './models.ts';
-import { ActionResponse } from '../common/types.ts';
+import { Actions, buildActionHandler, buildChatHandlerGetter, ChatHandler, buildKeyboardBuilder } from '../common/chatHandler.ts';
 
 export const prefix = 'sonarr:';
-
-const chatHandlers: Record<number, ChatHandler> = {};
 
 function displaySeries(s: Series) {
     let res = `${s.id ? '✅' : ''} ${s.title} ${s.year || ''} `;
@@ -28,19 +25,18 @@ export const keys = {
     info: 'Info',
     delete: 'Delete',
 } as const;
+type Keys = typeof keys;
 
-type Action = typeof keys[keyof typeof keys];
-
-class ChatHandler {
-    handelText?: (text: string) => ActionResponse;
+class SonarrChatHandler extends ChatHandler<Keys> {
     searchResults?: Series[];
     myShows?: Series[];
 
-    constructor(private readonly chatId: number) {
+    constructor(readonly chatId: number) {
+        super(chatId);
         this.setDefaultTextHandling();
     }
 
-    actions: Record<Action, (data?: string) => ActionResponse> = {
+    actions: Actions<Keys> = {
         [keys.health]: async () => {
             const healthy = await this.updateProgress(api.health());
             return healthy ? '👌' : '😥';
@@ -192,30 +188,8 @@ class ChatHandler {
             return undefined;
         }
     }
-
-    private updateProgress<T>(promise: Promise<T>) {
-        return updateLongProcess(this.chatId, promise);
-    }
 }
 
-export function keyboard(actions: (Action | `${Action}:${string}`)[]) {
-    return new InlineKeyboard([
-        actions.map((key) => ({
-            text: key.split(':')[0],
-            callback_data: prefix + key,
-        })),
-    ]);
-}
-
-export function getChatHandler(chatId: number) {
-    chatHandlers[chatId] ??= new ChatHandler(chatId);
-    return chatHandlers[chatId];
-}
-
-export function handleAction(option: string, chatId?: number) {
-    const [_, key, data] = option.split(':') as [string, Action, string | undefined];
-    if (!chatId) {
-        return;
-    }
-    return getChatHandler(chatId).actions[key]?.(data);
-}
+export const keyboard = buildKeyboardBuilder<Keys>(prefix);
+export const getChatHandler = buildChatHandlerGetter(SonarrChatHandler);
+export const handleAction = buildActionHandler(getChatHandler);
