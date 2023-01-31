@@ -1,5 +1,6 @@
 import { config } from '../common/config.ts';
 import { Http } from '../common/httpReq.ts';
+import { Movie } from './models.ts';
 
 const rootFolderPath = '/movies/';
 const http = new Http();
@@ -15,4 +16,10 @@ export async function health() {
         console.error(error);
         return false;
     }
+}
+
+export function getMyList(id: number): Promise<Movie>;
+export function getMyList(): Promise<Movie[]>;
+export function getMyList(id?: number) {
+    return http.get(`/movie/${id ?? ''}`);
 }

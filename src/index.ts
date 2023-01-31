@@ -14,7 +14,7 @@ bot.command('sonarr', (ctx) => {
 
 bot.command('radarr', (ctx) => {
     ctx.reply('Radarr options:', {
-        reply_markup: radarr.keyboard([radarr.keys.health]),
+        reply_markup: radarr.keyboard([radarr.keys.health, radarr.keys.list]),
     });
 });
 

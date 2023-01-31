@@ -29,7 +29,6 @@ type Keys = typeof keys;
 
 class SonarrChatHandler extends ChatHandler<Keys> {
     searchResults?: Series[];
-    myShows?: Series[];
 
     constructor(readonly chatId: number) {
         super(chatId);
@@ -172,7 +171,6 @@ class SonarrChatHandler extends ChatHandler<Keys> {
     private async getMyShows() {
         try {
             const series = await this.updateProgress(api.getMyList());
-            this.myShows = series;
             return series.map((s) => `/${s.id} ${s.title}`).join('\n');
         } catch (error) {
             console.error(error);
