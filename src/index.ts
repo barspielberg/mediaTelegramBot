@@ -14,12 +14,12 @@ bot.command('sonarr', (ctx) => {
 
 bot.command('radarr', (ctx) => {
     ctx.reply('Radarr options:', {
-        reply_markup: radarr.keyboard([radarr.keys.health, radarr.keys.list]),
+        reply_markup: radarr.keyboard([radarr.keys.health, radarr.keys.list, radarr.keys.search]),
     });
 });
 
 bot.on('message:text', async (ctx) => {
-    const { handelText } = sonarr.getChatHandler(ctx.chat.id);
+    const { handelText } = radarr.getChatHandler(ctx.chat.id) ?? sonarr.getChatHandler(ctx.chat.id);
     if (!handelText) {
         return;
     }

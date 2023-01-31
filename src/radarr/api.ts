@@ -23,3 +23,21 @@ export function getMyList(): Promise<Movie[]>;
 export function getMyList(id?: number) {
     return http.get(`/movie/${id ?? ''}`);
 }
+
+export function search(name: string): Promise<Movie[]> {
+    return http.get<Movie[]>(`/movie/lookup?term=${name}`);
+}
+
+export async function deleteMovie(id: number) {
+    try {
+        await http.del(`/movie/${id}?deleteFiles=true`);
+        return true;
+    } catch (error) {
+        console.error(error);
+    }
+    return false;
+}
+
+export function add(current: Movie): Promise<unknown> {
+    throw new Error('Function not implemented.');
+}
