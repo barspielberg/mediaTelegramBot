@@ -4,6 +4,7 @@ import * as api from './api.ts';
 import { Movie } from './models.ts';
 
 export const prefix = 'radarr:';
+export const mark = '/M';
 
 function displayMovie(m: Movie) {
     let res = `${m.id ? '✅' : ''} ${m.title} ${m.year || ''} `;
@@ -126,7 +127,7 @@ class RadarrChatHandler extends ChatHandler<Keys> {
 
     public defaultHandleText = async (text: string) => {
         if (text.startsWith('/')) {
-            const id = Number(text.slice(1));
+            const id = Number(text.slice(2));
             if (Number.isInteger(id)) {
                 return this.handelMovieId(id);
             }
@@ -162,7 +163,7 @@ class RadarrChatHandler extends ChatHandler<Keys> {
     private async getMyMovies() {
         try {
             const movies = await this.updateProgress(api.getMyList());
-            return movies.map((s) => `/${s.id} ${s.title}`).join('\n');
+            return movies.map((s) => `${mark}${s.id} ${s.title}`).join('\n');
         } catch (error) {
             console.error(error);
             return '😓';

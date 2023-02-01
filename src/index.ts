@@ -26,14 +26,24 @@ bot.command('radarr', (ctx) => {
 });
 
 bot.on('message:text', async (ctx) => {
-    const handelText = services.map((s) => s.getChatHandler(ctx.chat.id).handelText).find(Boolean);
-    if (!handelText) {
-        ctx.reply('Looking for?', {
-            reply_markup: searchOptions(ctx.message.text),
-        });
-        return;
-    }
-    const res = await handelText(ctx.message.text);
+    const { id } = ctx.chat;
+    const handelText = services.map((s) => s.getChatHandler(id).handelText).find(Boolean);
+    const { text } = ctx.message;
+
+    const res = await (() => {
+        if (handelText) {
+            return handelText(text);
+        }
+        if (text.startsWith('/')) {
+            for (const service of services) {
+                if (text.startsWith(service.mark)) {
+                    return service.getChatHandler(id).defaultHandleText(text);
+                }
+            }
+        }
+        return { message: 'Looking for?', markup: searchOptions(text) };
+    })();
+
     if (res) {
         const { message, markup } = stringToMessage(res);
         ctx.reply(message, {

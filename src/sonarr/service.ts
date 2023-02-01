@@ -5,6 +5,7 @@ import { Series } from './models.ts';
 import { Actions, buildActionHandler, buildChatHandlerGetter, ChatHandler, buildKeyboardBuilder } from '../common/chatHandler.ts';
 
 export const prefix = 'sonarr:';
+export const mark = '/S';
 
 function displaySeries(s: Series) {
     let res = `${s.id ? '✅' : ''} ${s.title} ${s.year || ''} `;
@@ -136,7 +137,7 @@ class SonarrChatHandler extends ChatHandler<Keys> {
 
     public defaultHandleText = async (text: string) => {
         if (text.startsWith('/')) {
-            const id = Number(text.slice(1));
+            const id = Number(text.slice(2));
             if (Number.isInteger(id)) {
                 return this.handelShowId(id);
             }
@@ -172,7 +173,7 @@ class SonarrChatHandler extends ChatHandler<Keys> {
     private async getMyShows() {
         try {
             const series = await this.updateProgress(api.getMyList());
-            return series.map((s) => `/${s.id} ${s.title}`).join('\n');
+            return series.map((s) => `${mark}${s.id} ${s.title}`).join('\n');
         } catch (error) {
             console.error(error);
             return '😓';
