@@ -2,7 +2,7 @@ import { config } from '../common/config.ts';
 import { Http } from '../common/httpReq.ts';
 import { Movie } from './models.ts';
 
-const rootFolderPath = '/movies/';
+const rootFolderPath = '/movies';
 const http = new Http();
 
 http.key = config.RADARR_KEY;
@@ -38,6 +38,35 @@ export async function deleteMovie(id: number) {
     return false;
 }
 
-export function add(current: Movie): Promise<unknown> {
-    throw new Error('Function not implemented.');
+export async function add(
+    movie: Movie,
+    addOptions = {
+        monitor: 'movieOnly',
+        searchForMovie: true,
+    }
+) {
+    const defaults = {
+        id: 0,
+        qualityProfileId: 6,
+        rootFolderPath,
+        minimumAvailability: 'released',
+        monitored: true,
+    };
+    const payload = { ...movie, addOptions, ...defaults };
+    console.log(payload);
+    try {
+        const res = await http.post('/movie/', payload, {
+            'Content-Encoding': 'gzip',
+            'Content-Type': 'application/json; charset=utf-8',
+        });
+        if (res.ok && res.status === 201) {
+            return true;
+        }
+        console.error(res);
+    } catch (error) {
+        console.error(error);
+        return false;
+    }
+
+    return false;
 }

@@ -12,7 +12,7 @@ export class Http {
             const res = await fetch(url, {
                 ...init,
                 signal: controller.signal,
-                headers: { ['x-api-key']: this.key },
+                headers: { ['x-api-key']: this.key, ...init?.headers },
             });
             if (!res.ok) {
                 const err = new Error(res.statusText);
@@ -30,9 +30,9 @@ export class Http {
         return data;
     }
 
-    async post(url: string, payload: any) {
+    async post(url: string, payload: any, headers: Record<string, string> = { 'Content-Type': 'application/json' }) {
         const res = await this.fetchTimeout(this.baseUrl + url, {
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             method: 'POST',
             body: JSON.stringify(payload),
         });
