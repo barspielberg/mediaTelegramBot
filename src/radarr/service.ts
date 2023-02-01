@@ -81,6 +81,7 @@ class RadarrChatHandler extends ChatHandler<Keys> {
         const movie = await this.getMyMovie(id);
 
         let info = `info`;
+        //TODO
 
         return movie ? info : '🤷🏻‍♂';
     }
@@ -120,10 +121,10 @@ class RadarrChatHandler extends ChatHandler<Keys> {
     }
 
     private setDefaultTextHandling() {
-        this.handelText = this.defaultHandleText;
+        this.handelText = undefined;
     }
 
-    private defaultHandleText = async (text: string) => {
+    public defaultHandleText = async (text: string) => {
         if (text.startsWith('/')) {
             const id = Number(text.slice(1));
             if (Number.isInteger(id)) {

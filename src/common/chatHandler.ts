@@ -10,6 +10,7 @@ export type Actions<T extends Keys> = Record<ValueOf<T>, (data?: string) => Acti
 
 export abstract class ChatHandler<T extends Keys> {
     handelText?: (text: string) => ActionResponse;
+    abstract defaultHandleText: (text: string) => ActionResponse;
 
     constructor(readonly chatId: number) {}
 

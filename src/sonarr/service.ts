@@ -13,6 +13,7 @@ function displaySeries(s: Series) {
     } else if (s.remotePoster) {
         res += `\n${s.remotePoster}`;
     }
+    //TODO add next airing
     return res;
 }
 
@@ -130,10 +131,10 @@ class SonarrChatHandler extends ChatHandler<Keys> {
     }
 
     private setDefaultTextHandling() {
-        this.handelText = this.defaultHandleText;
+        this.handelText = undefined;
     }
 
-    private defaultHandleText = async (text: string) => {
+    public defaultHandleText = async (text: string) => {
         if (text.startsWith('/')) {
             const id = Number(text.slice(1));
             if (Number.isInteger(id)) {
