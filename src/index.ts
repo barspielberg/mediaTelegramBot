@@ -26,7 +26,7 @@ bot.command('radarr', (ctx) => {
 });
 
 bot.on('message:text', async (ctx) => {
-    const { handelText } = radarr.getChatHandler(ctx.chat.id) ?? sonarr.getChatHandler(ctx.chat.id);
+    const handelText = services.map((s) => s.getChatHandler(ctx.chat.id).handelText).find(Boolean);
     if (!handelText) {
         ctx.reply('Looking for?', {
             reply_markup: searchOptions(ctx.message.text),
