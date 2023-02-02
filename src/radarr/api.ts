@@ -53,7 +53,6 @@ export async function add(
         monitored: true,
     };
     const payload = { ...movie, addOptions, ...defaults };
-    console.log(payload);
     try {
         const res = await http.post('/movie/', payload, {
             'Content-Encoding': 'gzip',
