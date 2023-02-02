@@ -32,6 +32,8 @@ export interface Series {
     statistics: Statistics;
     remotePoster?: string;
     certification?: string;
+    nextAiring?: string;
+    previousAiring?: string;
 }
 
 export interface Image {

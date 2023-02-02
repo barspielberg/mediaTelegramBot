@@ -14,7 +14,6 @@ function displaySeries(s: Series) {
     } else if (s.remotePoster) {
         res += `\n${s.remotePoster}`;
     }
-    //TODO add next airing
     return res;
 }
 
@@ -93,6 +92,9 @@ class SonarrChatHandler extends ChatHandler<Keys> {
         info += '\n';
         info += `Episodes: ${series?.statistics.episodeCount} / ${series?.statistics.totalEpisodeCount}\n`;
         info += `${formatFileSize(series?.statistics.sizeOnDisk)} (${series?.statistics.episodeFileCount} episode files)\n`;
+        info += '\n';
+        info += series?.nextAiring ? `Next airing: ${new Date(series.nextAiring).toLocaleString()}\n` : '';
+        info += series?.previousAiring ? `Previous airing: ${new Date(series.previousAiring).toLocaleString()}\n` : '';
 
         return series ? info : '🤷🏻‍♂';
     }
