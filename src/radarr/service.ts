@@ -1,5 +1,6 @@
 import { bot } from '../common/bot.ts';
 import { buildKeyboardBuilder, buildChatHandlerGetter, buildActionHandler, ChatHandler, Actions } from '../common/chatHandler.ts';
+import { formatFileSize } from '../common/utils.ts';
 import * as api from './api.ts';
 import { Movie } from './models.ts';
 
@@ -81,8 +82,13 @@ class RadarrChatHandler extends ChatHandler<Keys> {
         id = Number(id);
         const movie = await this.getMyMovie(id);
 
-        let info = `info`;
-        //TODO
+        let info = `Status: ${movie?.status}\n`;
+        info += `Studio: ${movie?.studio}\n\n`;
+        info += `Year: ${movie?.year}\n`;
+        info += `Physical release: ${movie?.physicalRelease ? new Date(movie.physicalRelease).toLocaleDateString() : ''}\n\n`;
+        info += `Monitored: ${movie?.monitored ? '👍' : '👎'}\n`;
+        info += `Available: ${movie?.isAvailable ? '👍' : '👎'}\n\n`;
+        info += `${formatFileSize(movie?.sizeOnDisk)}\n`;
 
         return movie ? info : '🤷🏻‍♂';
     }
