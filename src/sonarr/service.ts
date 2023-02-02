@@ -3,7 +3,9 @@ import { formatFileSize } from '../common/utils.ts';
 import * as api from './api.ts';
 import { Series } from './models.ts';
 import { Actions, buildActionHandler, buildChatHandlerGetter, ChatHandler, buildKeyboardBuilder } from '../common/chatHandler.ts';
+import { config } from '../common/config.ts';
 
+const tz = config.TIMEZONE;
 export const prefix = 'sonarr:';
 export const mark = '/S';
 
@@ -94,8 +96,8 @@ class SonarrChatHandler extends ChatHandler<Keys> {
         info += `Episodes: ${series?.statistics.episodeCount} / ${series?.statistics.totalEpisodeCount}\n`;
         info += `${formatFileSize(series?.statistics.sizeOnDisk)} (${series?.statistics.episodeFileCount} episode files)\n`;
         info += '\n';
-        info += series?.nextAiring ? `Next airing: ${new Date(series.nextAiring).toLocaleString()}\n` : '';
-        info += series?.previousAiring ? `Previous airing: ${new Date(series.previousAiring).toLocaleString()}\n` : '';
+        info += series?.nextAiring ? `Next airing: ${new Date(series.nextAiring).toLocaleString(tz)}\n` : '';
+        info += series?.previousAiring ? `Previous airing: ${new Date(series.previousAiring).toLocaleString(tz)}\n` : '';
 
         return series ? info : '🤷🏻‍♂';
     }
@@ -160,7 +162,7 @@ class SonarrChatHandler extends ChatHandler<Keys> {
         this.handelText = async (text) => {
             this.setDefaultTextHandling();
 
-            if (text.toLocaleLowerCase() !== 'yes') {
+            if (text.toLowerCase() !== 'yes') {
                 return '🤷🏻‍♂';
             }
             const res = await this.updateProgress(api.add(current));

@@ -6,4 +6,5 @@ export const config = {
     RADARR_KEY: Deno.env.get('RADARR_KEY') ?? '',
     BASE_URL: Deno.env.get('BASE_URL') ?? '',
     ALLOWED_CHATS: Deno.env.get('ALLOWED_CHATS') ?? '',
+    TIMEZONE: Deno.env.get('TIMEZONE'),
 };

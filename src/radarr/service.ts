@@ -1,16 +1,18 @@
 import { bot } from '../common/bot.ts';
 import { buildKeyboardBuilder, buildChatHandlerGetter, buildActionHandler, ChatHandler, Actions } from '../common/chatHandler.ts';
+import { config } from '../common/config.ts';
 import { formatFileSize } from '../common/utils.ts';
 import * as api from './api.ts';
 import { Movie } from './models.ts';
 
+const tz = config.TIMEZONE;
 export const prefix = 'radarr:';
 export const mark = '/M';
 
 function displayMovie(m: Movie) {
     const { id, title, imdbId, remotePoster, inCinemas, runtime } = m;
     let res = `${id ? '✅' : ''} ${title} - `;
-    res += inCinemas ? new Date(inCinemas).toLocaleDateString() : '';
+    res += inCinemas ? new Date(inCinemas).toLocaleDateString(tz) : '';
     res += '\n';
     res += runtime ? `\n${runtime}min` : '';
     res += '\n\n';
@@ -85,7 +87,9 @@ class RadarrChatHandler extends ChatHandler<Keys> {
 
         let info = `Status: ${movie?.status}\n`;
         info += `Studio: ${movie?.studio}\n\n`;
-        info += `Physical release: ${movie?.physicalRelease ? new Date(movie.physicalRelease).toLocaleDateString() : '🤷🏻‍♂'}\n\n`;
+        info += `Physical release: ${
+            movie?.physicalRelease ? new Date(movie.physicalRelease).toLocaleDateString(tz) : '🤷🏻‍♂'
+        }\n\n`;
         info += `Monitored: ${movie?.monitored ? '👍' : '👎'}\n`;
         info += `Available: ${movie?.isAvailable ? '👍' : '👎'}\n\n`;
         info += `${formatFileSize(movie?.sizeOnDisk)}\n`;
@@ -153,7 +157,7 @@ class RadarrChatHandler extends ChatHandler<Keys> {
         this.handelText = async (text) => {
             this.setDefaultTextHandling();
 
-            if (text.toLocaleLowerCase() !== 'yes') {
+            if (text.toLowerCase() !== 'yes') {
                 return '🤷🏻‍♂';
             }
             const res = await this.updateProgress(api.add(current));
