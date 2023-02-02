@@ -8,12 +8,12 @@ export const prefix = 'radarr:';
 export const mark = '/M';
 
 function displayMovie(m: Movie) {
-    let res = `${m.id ? '✅' : ''} ${m.title} ${m.year || ''} `;
-    if (m.imdbId) {
-        res += `\nhttps://www.imdb.com/title/${m.imdbId}`;
-    } else if (m.remotePoster) {
-        res += `\n${m.remotePoster}`;
-    }
+    const { id, title, imdbId, remotePoster, inCinemas, runtime } = m;
+    let res = `${id ? '✅' : ''} ${title} - `;
+    res += inCinemas ? new Date(inCinemas).toLocaleDateString() : '';
+    res += runtime ? `\n${runtime}min` : '';
+    res += '\n\n';
+    res += imdbId ? `https://www.imdb.com/title/${imdbId}` : remotePoster ? remotePoster : '';
     return res;
 }
 
@@ -84,7 +84,6 @@ class RadarrChatHandler extends ChatHandler<Keys> {
 
         let info = `Status: ${movie?.status}\n`;
         info += `Studio: ${movie?.studio}\n\n`;
-        info += `Year: ${movie?.year}\n`;
         info += `Physical release: ${movie?.physicalRelease ? new Date(movie.physicalRelease).toLocaleDateString() : ''}\n\n`;
         info += `Monitored: ${movie?.monitored ? '👍' : '👎'}\n`;
         info += `Available: ${movie?.isAvailable ? '👍' : '👎'}\n\n`;
