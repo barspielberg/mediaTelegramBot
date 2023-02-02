@@ -9,6 +9,7 @@ export const mark = '/S';
 
 function displaySeries(s: Series) {
     let res = `${s.id ? '✅' : ''} ${s.title} ${s.year || ''} `;
+    res += '\n';
     if (s.imdbId) {
         res += `\nhttps://www.imdb.com/title/${s.imdbId}`;
     } else if (s.remotePoster) {

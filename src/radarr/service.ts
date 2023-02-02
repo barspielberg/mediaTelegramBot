@@ -11,6 +11,7 @@ function displayMovie(m: Movie) {
     const { id, title, imdbId, remotePoster, inCinemas, runtime } = m;
     let res = `${id ? '✅' : ''} ${title} - `;
     res += inCinemas ? new Date(inCinemas).toLocaleDateString() : '';
+    res += '\n';
     res += runtime ? `\n${runtime}min` : '';
     res += '\n\n';
     res += imdbId ? `https://www.imdb.com/title/${imdbId}` : remotePoster ? remotePoster : '';
@@ -84,7 +85,7 @@ class RadarrChatHandler extends ChatHandler<Keys> {
 
         let info = `Status: ${movie?.status}\n`;
         info += `Studio: ${movie?.studio}\n\n`;
-        info += `Physical release: ${movie?.physicalRelease ? new Date(movie.physicalRelease).toLocaleDateString() : ''}\n\n`;
+        info += `Physical release: ${movie?.physicalRelease ? new Date(movie.physicalRelease).toLocaleDateString() : '🤷🏻‍♂'}\n\n`;
         info += `Monitored: ${movie?.monitored ? '👍' : '👎'}\n`;
         info += `Available: ${movie?.isAvailable ? '👍' : '👎'}\n\n`;
         info += `${formatFileSize(movie?.sizeOnDisk)}\n`;
