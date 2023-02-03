@@ -24,27 +24,25 @@ export function search(name: string) {
 
 export async function add(
     series: Series,
-    addOption: AddOptions = {
+    addOptions: AddOptions = {
         searchForMissingEpisodes: true,
         searchForCutoffUnmetEpisodes: false,
-        ignoreEpisodesWithFiles: false,
-        ignoreEpisodesWithoutFiles: false,
         monitor: 'all',
     }
 ) {
-    const { folder, ...rest } = series;
     const defaults = {
-        alternateTitles: [],
-        path: `${rootFolderPath}${folder}`,
         qualityProfileId: 6, //TODO add to options
         languageProfileId: 1,
         seasonFolder: true,
         rootFolderPath,
-        added: new Date().toISOString(),
+        monitored: true,
     };
-    const payload = { ...rest, ...defaults, addOption };
+    const payload = { ...series, ...defaults, addOptions };
     try {
-        const res = await http.post('/series/', payload);
+        const res = await http.post('/series/', payload, {
+            'Content-Encoding': 'gzip',
+            'Content-Type': 'application/json; charset=utf-8',
+        });
         if (res.ok && res.status === 201) {
             return true;
         }

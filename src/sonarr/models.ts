@@ -81,7 +81,7 @@ export interface AddOptions {
     //TODO check for more valid options
     searchForMissingEpisodes: true;
     searchForCutoffUnmetEpisodes: false;
-    ignoreEpisodesWithFiles: false;
-    ignoreEpisodesWithoutFiles: false;
+    ignoreEpisodesWithFiles?: false;
+    ignoreEpisodesWithoutFiles?: false;
     monitor: 'all';
 }
