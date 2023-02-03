@@ -55,13 +55,13 @@ export async function add(
     return false;
 }
 
-export function getMyList(id: number): Promise<Series>;
-export function getMyList(): Promise<Series[]>;
-export function getMyList(id?: number) {
+export function getMedia(id: number): Promise<Series>;
+export function getMedia(): Promise<Series[]>;
+export function getMedia(id?: number) {
     return http.get(`/series/${id ?? ''}`);
 }
 
-export async function deleteSeries(id: number) {
+export async function deleteMedia(id: number) {
     try {
         await http.del(`/series/${id}?deleteFiles=true`);
         return true;

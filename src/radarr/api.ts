@@ -18,9 +18,9 @@ export async function health() {
     }
 }
 
-export function getMyList(id: number): Promise<Movie>;
-export function getMyList(): Promise<Movie[]>;
-export function getMyList(id?: number) {
+export function getMedia(id: number): Promise<Movie>;
+export function getMedia(): Promise<Movie[]>;
+export function getMedia(id?: number) {
     return http.get(`/movie/${id ?? ''}`);
 }
 
@@ -28,7 +28,7 @@ export function search(name: string): Promise<Movie[]> {
     return http.get<Movie[]>(`/movie/lookup?term=${name}`);
 }
 
-export async function deleteMovie(id: number) {
+export async function deleteMedia(id: number) {
     try {
         await http.del(`/movie/${id}?deleteFiles=true`);
         return true;

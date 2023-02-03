@@ -4,6 +4,7 @@ import { sonarr } from './sonarr/index.ts';
 import { radarr } from './radarr/index.ts';
 import { stringToMessage } from './common/utils.ts';
 import { InlineKeyboard } from './pkg/grammy.ts';
+import { keys } from './common/mediaChatHandler.ts';
 
 const SEARCH = 'search:';
 function searchOptions(text: string) {
@@ -15,13 +16,13 @@ bot.use(middleware.log, middleware.auth);
 
 bot.command('sonarr', (ctx) => {
     ctx.reply('Sonarr options:', {
-        reply_markup: sonarr.keyboard([sonarr.keys.search, sonarr.keys.list, sonarr.keys.health]),
+        reply_markup: sonarr.keyboard([keys.search, keys.list, keys.health]),
     });
 });
 
 bot.command('radarr', (ctx) => {
     ctx.reply('Radarr options:', {
-        reply_markup: radarr.keyboard([radarr.keys.search, radarr.keys.list, radarr.keys.health]),
+        reply_markup: radarr.keyboard([keys.search, keys.list, keys.health]),
     });
 });
 

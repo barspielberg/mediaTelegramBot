@@ -21,7 +21,9 @@ export abstract class ChatHandler<T extends Keys> {
     }
 }
 
-export function buildKeyboardBuilder<T extends Keys>(prefix: string) {
+export type KeyboardBuilder<T extends Keys> = (actions: (ValueOf<T> | `${ValueOf<T>}:${string}`)[]) => InlineKeyboard;
+
+export function buildKeyboardBuilder<T extends Keys>(prefix: string): KeyboardBuilder<T> {
     return function (actions: (ValueOf<T> | `${ValueOf<T>}:${string}`)[]) {
         return new InlineKeyboard([
             actions.map((key) => ({
