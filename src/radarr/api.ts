@@ -1,6 +1,6 @@
 import { config } from '../common/config.ts';
 import { Http } from '../common/httpReq.ts';
-import { Movie } from './models.ts';
+import { Movie } from './Movie.ts';
 
 const rootFolderPath = '/movies';
 const http = new Http();

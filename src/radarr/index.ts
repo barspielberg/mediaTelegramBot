@@ -1,1 +1,1 @@
-export * as radarr from './service.ts';
+export * as radarr from './radarrService.ts';

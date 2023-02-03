@@ -1,1 +1,1 @@
-export * as sonarr from './service.ts';
+export * as sonarr from './sonarrService.ts';

@@ -1,6 +1,6 @@
 import { bot } from '../common/bot.ts';
-import { Movie } from '../radarr/models.ts';
-import { Series } from '../sonarr/models.ts';
+import { Movie } from '../radarr/Movie.ts';
+import { Series } from '../sonarr/Series.ts';
 import { Actions, ChatHandler, KeyboardBuilder } from './chatHandler.ts';
 import { ActionResponse } from './types.ts';
 

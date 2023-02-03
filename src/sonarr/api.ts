@@ -1,6 +1,6 @@
 import { Http } from '../common/httpReq.ts';
 import { config } from '../common/config.ts';
-import { AddOptions, Series } from './models.ts';
+import { AddOptions, Series } from './Series.ts';
 
 const rootFolderPath = '/tv/';
 const http = new Http();

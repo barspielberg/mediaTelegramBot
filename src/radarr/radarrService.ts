@@ -3,7 +3,7 @@ import { config } from '../common/config.ts';
 import { Keys, MediaChatHandler } from '../common/mediaChatHandler.ts';
 import { formatFileSize } from '../common/utils.ts';
 import * as api from './api.ts';
-import { Movie } from './models.ts';
+import { Movie } from './Movie.ts';
 
 const tz = config.TIMEZONE;
 export const prefix = 'radarr:';

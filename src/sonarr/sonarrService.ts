@@ -1,6 +1,6 @@
 import { formatFileSize } from '../common/utils.ts';
 import * as api from './api.ts';
-import { Series } from './models.ts';
+import { Series } from './Series.ts';
 import { buildActionHandler, buildChatHandlerGetter, buildKeyboardBuilder } from '../common/chatHandler.ts';
 import { config } from '../common/config.ts';
 import { Keys, MediaChatHandler } from '../common/mediaChatHandler.ts';
