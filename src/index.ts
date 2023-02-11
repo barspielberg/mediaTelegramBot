@@ -3,7 +3,7 @@ import * as middleware from './middleware.ts';
 import { sonarr } from './sonarr/index.ts';
 import { radarr } from './radarr/index.ts';
 import { stringToMessage, updateLongProcess } from './common/utils.ts';
-import { InlineKeyboard } from './pkg/grammy.ts';
+import { GrammyError, HttpError, InlineKeyboard } from './pkg/grammy.ts';
 import { keys } from './common/mediaChatHandler.ts';
 
 const SEARCH = 'search:';
@@ -89,6 +89,21 @@ bot.on('callback_query', async (ctx) => {
         ctx.reply(message, { reply_markup: markup });
     }
     ctx.answerCallbackQuery();
+});
+
+bot.catch((err) => {
+    const ctx = err.ctx;
+    console.error(`Error while handling update ${ctx.update.update_id}:`);
+    const e = err.error;
+    if (e instanceof GrammyError) {
+        console.error('Error in request:', e.description);
+    } else if (e instanceof HttpError) {
+        console.error('HTTP error:', e);
+    } else {
+        console.error('Unknown error:', e);
+    }
+
+    ctx.reply('😵');
 });
 
 bot.start({ drop_pending_updates: true }).catch(console.error);
