@@ -6,7 +6,6 @@ import { ActionResponse, Actions, ValueOf } from './types.ts';
 import { updateLongProcess } from './utils.ts';
 
 export const keys = {
-    health: 'OK?',
     search: 'Search',
     more: 'Next >>',
     grub: 'Grub',
@@ -38,7 +37,6 @@ export abstract class MediaChatHandler<T extends Series | Movie> {
     searchResults?: T[];
 
     actions: Actions<Keys> = {
-        [keys.health]: () => this.healthCheck(),
         [keys.search]: () => this.replayToSearch(),
         [keys.more]: (index) => this.displayNextSearch(index),
         [keys.grub]: (index) => this.grubCurrentMedia(index),

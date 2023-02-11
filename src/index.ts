@@ -2,7 +2,7 @@ import { bot } from './common/bot.ts';
 import * as middleware from './middleware.ts';
 import { sonarr } from './sonarr/index.ts';
 import { radarr } from './radarr/index.ts';
-import { stringToMessage } from './common/utils.ts';
+import { stringToMessage, updateLongProcess } from './common/utils.ts';
 import { InlineKeyboard } from './pkg/grammy.ts';
 import { keys } from './common/mediaChatHandler.ts';
 
@@ -14,15 +14,30 @@ const services = [sonarr, radarr];
 
 bot.use(middleware.log, middleware.auth);
 
+bot.command('health', async (ctx) => {
+    const { id } = ctx.chat;
+    const results = await updateLongProcess(
+        id,
+        Promise.all(
+            services.map(async (s) => ({
+                serviceName: s.prefix,
+                health: await s.getChatHandler(id).healthCheck(),
+            }))
+        )
+    );
+    const msg = results.map((r) => `${r.serviceName} ${r.health}`).join('\n');
+    ctx.reply(msg);
+});
+
 bot.command('sonarr', (ctx) => {
     ctx.reply('Sonarr options:', {
-        reply_markup: sonarr.keyboard([keys.search, keys.list, keys.health]),
+        reply_markup: sonarr.keyboard([keys.search, keys.list]),
     });
 });
 
 bot.command('radarr', (ctx) => {
     ctx.reply('Radarr options:', {
-        reply_markup: radarr.keyboard([keys.search, keys.list, keys.health]),
+        reply_markup: radarr.keyboard([keys.search, keys.list]),
     });
 });
 
@@ -80,6 +95,7 @@ bot.start({ drop_pending_updates: true }).catch(console.error);
 console.log('started');
 
 await bot.api.setMyCommands([
+    { command: 'health', description: 'health check for all services' },
     { command: 'sonarr', description: 'Tv show options' },
     { command: 'radarr', description: 'Movies options' },
 ]);
