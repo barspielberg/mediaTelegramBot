@@ -1,8 +1,12 @@
-import { buildKeyboardBuilder, buildChatHandlerGetter, buildActionHandler } from '../common/chatHandler.ts';
+import {
+    buildKeyboardBuilder,
+    buildChatHandlerGetter,
+    buildActionHandler,
+    MediaChatHandler,
+} from '../common/mediaChatHandler.ts';
 import { config } from '../common/config.ts';
-import { Keys, MediaChatHandler } from '../common/mediaChatHandler.ts';
 import { formatFileSize } from '../common/utils.ts';
-import * as api from './api.ts';
+import * as radarrApi from './radarrApi.ts';
 import { Movie } from './Movie.ts';
 
 const tz = config.TIMEZONE;
@@ -11,7 +15,7 @@ export const mark = '/M';
 
 class RadarrChatHandler extends MediaChatHandler<Movie> {
     mark = mark;
-    api = api;
+    api = radarrApi;
     keyboard = keyboard;
 
     displayMedia(m: Movie) {
@@ -42,6 +46,6 @@ class RadarrChatHandler extends MediaChatHandler<Movie> {
     }
 }
 
-export const keyboard = buildKeyboardBuilder<Keys>(prefix);
+export const keyboard = buildKeyboardBuilder(prefix);
 export const getChatHandler = buildChatHandlerGetter(RadarrChatHandler);
 export const handleAction = buildActionHandler(getChatHandler);

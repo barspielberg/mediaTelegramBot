@@ -1,8 +1,9 @@
 import { bot } from '../common/bot.ts';
+import { InlineKeyboard } from '../pkg/grammy.ts';
 import { Movie } from '../radarr/Movie.ts';
 import { Series } from '../sonarr/Series.ts';
-import { Actions, ChatHandler, KeyboardBuilder } from './chatHandler.ts';
-import { ActionResponse } from './types.ts';
+import { ActionResponse, Actions, ValueOf } from './types.ts';
+import { updateLongProcess } from './utils.ts';
 
 export const keys = {
     health: 'OK?',
@@ -24,19 +25,20 @@ interface MediaAPI<T> {
     add(item: T, options?: any): Promise<boolean>;
 }
 
-export abstract class MediaChatHandler<T extends Series | Movie> extends ChatHandler<Keys> {
+export abstract class MediaChatHandler<T extends Series | Movie> {
+    handelText?: (text: string) => ActionResponse;
+
+    constructor(readonly chatId: number) {}
+
     abstract mark: string;
     abstract api: MediaAPI<T>;
     abstract displayMedia(media: T): string;
     abstract getMediaInfo(id: string | undefined): ActionResponse;
-    abstract keyboard: KeyboardBuilder<Keys>;
+    abstract keyboard: KeyboardBuilder;
     searchResults?: T[];
 
     actions: Actions<Keys> = {
-        [keys.health]: async () => {
-            const healthy = await this.updateProgress(this.api.health());
-            return healthy ? '👌' : '😥';
-        },
+        [keys.health]: () => this.healthCheck(),
         [keys.search]: () => this.replayToSearch(),
         [keys.more]: (index) => this.displayNextSearch(index),
         [keys.grub]: (index) => this.grubCurrentMedia(index),
@@ -55,6 +57,11 @@ export abstract class MediaChatHandler<T extends Series | Movie> extends ChatHan
             message: 'Search for..?',
             markup: { force_reply: true as const },
         };
+    }
+
+    async healthCheck() {
+        const healthy = await this.updateProgress(this.api.health());
+        return healthy ? '👌' : '😥';
     }
 
     async handelName(text: string) {
@@ -114,7 +121,7 @@ export abstract class MediaChatHandler<T extends Series | Movie> extends ChatHan
         this.handelText = undefined;
     }
 
-    public defaultHandleText = async (text: string) => {
+    defaultHandleText = async (text: string) => {
         if (text.startsWith('/')) {
             const id = Number(text.slice(2));
             if (Number.isInteger(id)) {
@@ -126,7 +133,7 @@ export abstract class MediaChatHandler<T extends Series | Movie> extends ChatHan
         return this.handelName(text);
     };
 
-    private grubCurrentMedia(index?: string | number) {
+    grubCurrentMedia(index?: string | number) {
         index = Number(index);
         const current = this.searchResults?.[index];
         if (!current || current.id) {
@@ -167,4 +174,39 @@ export abstract class MediaChatHandler<T extends Series | Movie> extends ChatHan
             return undefined;
         }
     }
+
+    updateProgress<T>(promise: Promise<T>) {
+        return updateLongProcess(this.chatId, promise);
+    }
+}
+
+export type KeyboardBuilder = (actions: (ValueOf<Keys> | `${ValueOf<Keys>}:${string}`)[]) => InlineKeyboard;
+
+export function buildKeyboardBuilder(prefix: string): KeyboardBuilder {
+    return function (actions: (ValueOf<Keys> | `${ValueOf<Keys>}:${string}`)[]) {
+        return new InlineKeyboard([
+            actions.map((key) => ({
+                text: key.split(':')[0],
+                callback_data: prefix + key,
+            })),
+        ]);
+    };
+}
+
+export function buildChatHandlerGetter<T extends Series | Movie>(handler: { new (chatId: number): MediaChatHandler<T> }) {
+    const chatHandlers: Record<number, MediaChatHandler<T>> = {};
+    return function (chatId: number) {
+        chatHandlers[chatId] ??= new handler(chatId);
+        return chatHandlers[chatId];
+    };
+}
+
+export function buildActionHandler<T extends Series | Movie>(getter: (chatId: number) => MediaChatHandler<T>) {
+    return function (option: string, chatId?: number) {
+        const [_, key, data] = option.split(':') as [string, ValueOf<Keys>, string | undefined];
+        if (!chatId) {
+            return;
+        }
+        return getter(chatId).actions[key]?.(data);
+    };
 }

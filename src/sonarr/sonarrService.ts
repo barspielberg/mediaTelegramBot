@@ -1,9 +1,13 @@
 import { formatFileSize } from '../common/utils.ts';
-import * as api from './api.ts';
 import { Series } from './Series.ts';
-import { buildActionHandler, buildChatHandlerGetter, buildKeyboardBuilder } from '../common/chatHandler.ts';
+import * as sonarrApi from './sonarrApi.ts';
+import {
+    buildActionHandler,
+    buildChatHandlerGetter,
+    buildKeyboardBuilder,
+    MediaChatHandler,
+} from '../common/mediaChatHandler.ts';
 import { config } from '../common/config.ts';
-import { Keys, MediaChatHandler } from '../common/mediaChatHandler.ts';
 
 const tz = config.TIMEZONE;
 export const prefix = 'sonarr:';
@@ -11,7 +15,7 @@ export const mark = '/S';
 
 class SonarrChatHandler extends MediaChatHandler<Series> {
     mark = mark;
-    api = api;
+    api = sonarrApi;
     keyboard = keyboard;
 
     displayMedia(s: Series) {
@@ -45,6 +49,6 @@ class SonarrChatHandler extends MediaChatHandler<Series> {
     }
 }
 
-export const keyboard = buildKeyboardBuilder<Keys>(prefix);
+export const keyboard = buildKeyboardBuilder(prefix);
 export const getChatHandler = buildChatHandlerGetter(SonarrChatHandler);
 export const handleAction = buildActionHandler(getChatHandler);
