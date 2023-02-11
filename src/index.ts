@@ -9,7 +9,7 @@ import { tunnelComposer } from './tunnel.ts';
 
 const SEARCH = 'search:';
 function searchOptions(text: string) {
-    return new InlineKeyboard().text('Movie', SEARCH + radarr.prefix + text).text('Tv show', SEARCH + sonarr.prefix + text);
+    return new InlineKeyboard().text('Tv show 📺', SEARCH + sonarr.prefix + text).text('Movie 🍿', SEARCH + radarr.prefix + text);
 }
 const services = [sonarr, radarr];
 
