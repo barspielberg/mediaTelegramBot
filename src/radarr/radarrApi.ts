@@ -6,7 +6,7 @@ const rootFolderPath = '/movies';
 const http = new Http();
 
 http.key = config.RADARR_KEY;
-http.baseUrl = `${config.BASE_URL}:7878/api/v3`;
+http.baseUrl = `${config.RADARR_BASE_URL}/api/v3`;
 
 export async function health() {
     try {

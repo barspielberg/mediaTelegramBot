@@ -5,6 +5,7 @@ import { radarr } from './radarr/index.ts';
 import { stringToMessage, updateLongProcess } from './common/utils.ts';
 import { GrammyError, HttpError, InlineKeyboard } from './pkg/grammy.ts';
 import { keys } from './common/mediaChatHandler.ts';
+import { tunnelComposer } from './tunnel.ts';
 
 const SEARCH = 'search:';
 function searchOptions(text: string) {
@@ -13,6 +14,8 @@ function searchOptions(text: string) {
 const services = [sonarr, radarr];
 
 bot.use(middleware.log, middleware.auth);
+
+bot.use(tunnelComposer);
 
 bot.command('health', async (ctx) => {
     const { id } = ctx.chat;
@@ -110,9 +113,10 @@ bot.start({ drop_pending_updates: true }).catch(console.error);
 console.log('started');
 
 await bot.api.setMyCommands([
-    { command: 'health', description: 'health check for all services' },
-    { command: 'sonarr', description: 'Tv show options' },
-    { command: 'radarr', description: 'Movies options' },
+    { command: 'sonarr', description: '📺 Tv show options' },
+    { command: 'radarr', description: '🍿 Movies options' },
+    { command: 'health', description: '🩺 Health check for all services' },
+    { command: 'tunnel', description: '🦸 Open an access tunnel' },
 ]);
 console.log('send commands');
 

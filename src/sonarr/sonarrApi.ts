@@ -6,7 +6,7 @@ const rootFolderPath = '/tv/';
 const http = new Http();
 
 http.key = config.SONARR_KEY;
-http.baseUrl = `${config.BASE_URL}:8989/api/v3`;
+http.baseUrl = `${config.SONARR_BASE_URL}/api/v3`;
 
 export async function health() {
     try {
