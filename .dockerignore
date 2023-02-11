@@ -3,6 +3,8 @@
 **/.git
 **/.gitignore
 **/.vscode
+**/.github
+**/.prettierrc
 **/docker-compose*
 **/Dockerfile*
 LICENSE
