@@ -8,7 +8,7 @@ import { updateLongProcess } from './utils.ts';
 export const keys = {
     search: 'Search',
     more: 'Next >>',
-    grub: 'Grub',
+    add: 'Add',
     list: 'List',
     info: 'Info',
     delete: 'Delete',
@@ -39,7 +39,7 @@ export abstract class MediaChatHandler<T extends Series | Movie> {
     actions: Actions<Keys> = {
         [keys.search]: () => this.replayToSearch(),
         [keys.more]: (index) => this.displayNextSearch(index),
-        [keys.grub]: (index) => this.grubCurrentMedia(index),
+        [keys.add]: (index) => this.addCurrentMedia(index),
         [keys.list]: () => this.getAllMyMedia(),
         [keys.info]: (id) => this.getMediaInfo(id),
         [keys.delete]: (id) => this.deleteMedia(id),
@@ -111,7 +111,7 @@ export abstract class MediaChatHandler<T extends Series | Movie> {
         const message = this.displayMedia(current);
         return {
             message,
-            markup: this.keyboard([`${keys.more}:${index}`, current.id ? `${keys.info}:${current.id}` : `${keys.grub}:${index}`]),
+            markup: this.keyboard([`${keys.more}:${index}`, current.id ? `${keys.info}:${current.id}` : `${keys.add}:${index}`]),
         };
     }
 
@@ -131,11 +131,11 @@ export abstract class MediaChatHandler<T extends Series | Movie> {
         return this.handelName(text);
     };
 
-    grubCurrentMedia(index?: string | number) {
+    addCurrentMedia(index?: string | number) {
         index = Number(index);
         const current = this.searchResults?.[index];
         if (!current || current.id) {
-            return current ? 'You already have that 👍' : 'cant found something to grub';
+            return current ? 'You already have that 👍' : "can't found something to add";
         }
 
         this.handelText = async (text) => {
