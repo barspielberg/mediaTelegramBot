@@ -27,11 +27,11 @@ USER deno
 
 COPY src/pkg src/pkg
 
-RUN deno cache src/pkg/index.ts
+RUN deno cache --allow-import src/pkg/index.ts
 
 # add project and run
 ADD . .
 
-RUN deno cache src/index.ts
+RUN deno cache --allow-import src/index.ts
 
-CMD ["run", "--allow-net", "--allow-read", "--allow-env","--allow-run", "src/index.ts"]
+CMD ["run", "--allow-import", "--allow-net", "--allow-read", "--allow-env", "--allow-run", "src/index.ts"]
