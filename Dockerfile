@@ -1,37 +1,28 @@
 FROM denoland/deno:ubuntu
 
-# install ngrok
-RUN apt update 
+# Install dependencies
+RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/*
 
-RUN apt -y install curl
+# Install latest ngrok (official binary)
+RUN curl -fsSL https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip -o ngrok.zip \
+    && unzip ngrok.zip \
+    && mv ngrok /usr/local/bin/ngrok \
+    && chmod +x /usr/local/bin/ngrok \
+    && rm ngrok.zip
 
-RUN curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null 
-
-RUN echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | tee /etc/apt/sources.list.d/ngrok.list 
-
-RUN apt update 
-
-RUN apt -y install ngrok
-
-# set user dir permissions 
+# Set user dir permissions
 WORKDIR /home
+RUN mkdir deno && chown deno:deno deno
 
-RUN mkdir deno
-
-RUN chown deno:deno deno
-
-# cache deno packages
+# Cache deno packages
 WORKDIR /app
-
 USER deno
 
 COPY src/pkg src/pkg
-
 RUN deno cache --allow-import src/pkg/index.ts
 
-# add project and run
-ADD . .
-
+# Add project and run
+COPY . .
 RUN deno cache --allow-import src/index.ts
 
 CMD ["run", "--allow-import", "--allow-net", "--allow-read", "--allow-env", "--allow-run", "src/index.ts"]
