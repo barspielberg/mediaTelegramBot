@@ -8,3 +8,11 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
+    network_mode: host
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./src
+          target: /app
+          ignore:
+            - node_modules
